@@ -8,8 +8,23 @@ public class GridSystem : MonoBehaviour
 
     [SerializeField] GameObject objectToPlace;
     [SerializeField] int gridSize;
-    [SerializeField] GameObject ghostObject;
+    GameObject ghostObject;
     [SerializeField] HashSet<Vector3> occupiedPositions = new HashSet<Vector3>();
+
+    private void Start()
+    {
+        CreateGhostObject();
+    }
+
+    private void Update()
+    {
+        UpdateGhostPosition();
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            PlaceObject();
+        }
+    }
 
     // Method to create the GameObject
     void CreateGhostObject()
@@ -64,6 +79,10 @@ public class GridSystem : MonoBehaviour
             {
                 SetGhostColor(Color.red);
             }
+            else
+            {
+                SetGhostColor(new Color(1f,1f, 1f, 0.5f));
+            }
         }
     }
 
@@ -84,7 +103,9 @@ public class GridSystem : MonoBehaviour
 
         if (!occupiedPositions.Contains(placementPosition))
         {
-            Instantiate(objectToPlace);
+            Instantiate(objectToPlace, placementPosition, Quaternion.identity);
+
+            occupiedPositions.Add(placementPosition);
         }
     }
 }

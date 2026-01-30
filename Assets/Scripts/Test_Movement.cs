@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Test_Movement : MonoBehaviour
 {
+    public System.Action OnMoveStarted;
+    public System.Action OnMoveFinished;
     public float cellSize = 1f;
     public float stepDuration = 0.12f;
 
@@ -51,8 +53,12 @@ public class Test_Movement : MonoBehaviour
         else
         {
             IsMoving = false;
+            OnMoveFinished?.Invoke();
             yield break;
+
         }
+
+        OnMoveStarted?.Invoke();
 
         for (int i = 0; i < steps; i++)
         {

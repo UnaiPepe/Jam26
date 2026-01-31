@@ -41,6 +41,10 @@ namespace Assets.Scripts.Managers
         [Header("Debug")]
         public bool showDebugButtons = true;
 
+        [Header("Start Settings")]
+        [Tooltip("Delay between clicking start (camera move) and the first Move Phase announcement.")]
+        public float startGameDelay = 0.5f;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -49,7 +53,33 @@ namespace Assets.Scripts.Managers
 
         private void Start()
         {
-            // Initial setup - skip announcements if needed or start with Move
+            // Initial setup - wait for manual start
+            currentPhase = GamePhase.Setup;
+        }
+
+        public void StartGame()
+        {
+            StartCoroutine(StartGameSequence());
+        }
+
+        private IEnumerator StartGameSequence()
+        {
+            Debug.Log("Starting Game Sequence...");
+            
+            // 1. Move Camera to next view (Menu -> Ring)
+            if (Assets.Scripts.Camera.CameraManager.Instance != null)
+            {
+                Assets.Scripts.Camera.CameraManager.Instance.NextView();
+            }
+            else
+            {
+                Debug.LogWarning("CameraManager missing! Cannot toggle view.");
+            }
+
+            // 2. Wait
+            yield return new WaitForSeconds(startGameDelay);
+
+            // 3. Start Game Loop
             ChangePhase(GamePhase.Move);
         }
 
@@ -74,6 +104,10 @@ namespace Assets.Scripts.Managers
                 case GamePhase.Victory:
                 case GamePhase.Defeat:
                     Debug.Log("Game Over.");
+                    return;
+                case GamePhase.Setup:
+                    // If we are in Setup and NextPhase is called (maybe by debug?), start the game
+                    StartGame();
                     return;
                 default:
                     next = GamePhase.Move;
@@ -199,28 +233,6 @@ namespace Assets.Scripts.Managers
             if (actAnnouncement) actAnnouncement.SetActive(false);
             if (startAnnouncement) startAnnouncement.SetActive(false);
             if (killAnnouncement) killAnnouncement.SetActive(false);
-        }
-
-        private void OnGUI()
-        {
-            if (!showDebugButtons) return;
-
-            GUILayout.BeginArea(new Rect(10, 10, 200, 300));
-            
-            GUILayout.Label($"Phase: {currentPhase}");
-
-            if (GUILayout.Button("Next Phase"))
-            {
-                NextPhase();
-            }
-
-            GUILayout.Space(10);
-            if (GUILayout.Button("Force Move")) ChangePhase(GamePhase.Move);
-            if (GUILayout.Button("Force Act")) ChangePhase(GamePhase.Act);
-            if (GUILayout.Button("Force Start")) ChangePhase(GamePhase.Start);
-            if (GUILayout.Button("Force Kill")) ChangePhase(GamePhase.Kill);
-
-            GUILayout.EndArea();
         }
     }
 }

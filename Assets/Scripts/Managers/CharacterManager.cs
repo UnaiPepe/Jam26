@@ -11,9 +11,6 @@ namespace Assets.Scripts.Managers
 
         private List<CharacterAttributes> _allCharacters = new List<CharacterAttributes>();
 
-        [Header("Debug")]
-        public bool showDebugInfo = true;
-
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -72,19 +69,5 @@ namespace Assets.Scripts.Managers
             Debug.Log($"========================");
         }
 
-        private void OnGUI()
-        {
-            if (!showDebugInfo) return;
-
-            GUILayout.BeginArea(new Rect(220, 10, 200, 100));
-            GUILayout.Label($"Players Alive: {GetAliveCount(Team.Player)}");
-            GUILayout.Label($"Enemies Alive: {GetAliveCount(Team.Enemy)}");
-            
-            if (GUILayout.Button("Print Counts"))
-            {
-                DebugPrintCounts();
-            }
-            GUILayout.EndArea();
-        }
     }
 }

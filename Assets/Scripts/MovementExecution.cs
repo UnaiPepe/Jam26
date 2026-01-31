@@ -87,5 +87,10 @@ public class MovementExecution : MonoBehaviour
 
         if (TurnManager.Instance != null)
             TurnManager.Instance.EndMovementExecution();
+
+        foreach (Unit u in FindObjectsOfType<Unit>())
+        {
+            u.ResetPushState();
+        }
     }
 }

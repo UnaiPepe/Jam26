@@ -5,8 +5,8 @@ using UnityEngine;
 public class PathArrowRenderer : MonoBehaviour
 {
     [Header("Body")]
-    public float width = 0.3f;
-    public float height = 0.05f;
+    public float width = 0.2f;     // grosor del cuerpo
+    public float height = 0.3f;    // altura sobre el suelo
 
     [Header("Prefabs")]
     public GameObject arrowHeadPrefab;
@@ -14,7 +14,7 @@ public class PathArrowRenderer : MonoBehaviour
 
     private Mesh mesh;
     private GameObject arrowHeadInstance;
-    private List<GameObject> corners = new();
+    private readonly List<GameObject> corners = new();
 
     private void Awake()
     {
@@ -25,15 +25,17 @@ public class PathArrowRenderer : MonoBehaviour
 
     // ================= PUBLIC API =================
 
-    public void RenderPath(List<Vector2Int> path)
+    // start = casilla de la unidad
+    // path = pasos HASTA ANTES del fantasma
+    public void RenderPath(Vector2Int start, List<Vector2Int> path)
     {
         Clear();
 
-        if (path == null || path.Count < 2)
+        if (path == null || path.Count == 0)
             return;
 
-        BuildBodyWithCorners(path);
-        PlaceArrowHead(path);
+        BuildBodyAndCorners(start, path);
+        PlaceArrowHead(start, path);
     }
 
     public void Clear()
@@ -50,23 +52,29 @@ public class PathArrowRenderer : MonoBehaviour
 
     // ================= BODY + CORNERS =================
 
-    private void BuildBodyWithCorners(List<Vector2Int> path)
+    private void BuildBodyAndCorners(Vector2Int start, List<Vector2Int> path)
     {
         List<Vector3> vertices = new();
         List<int> triangles = new();
         List<Vector2> uvs = new();
 
         int vertIndex = 0;
+        float shrink = 0.015f; // pequeño, para no crear huecos
 
-        for (int i = 0; i < path.Count - 1; i++)
+        Vector2Int from = start;
+
+        for (int i = 0; i < path.Count; i++)
         {
-            Vector2Int from = path[i];
-            Vector2Int to = path[i + 1];
+            Vector2Int to = path[i];
 
             Vector3 a = GridManager.Instance.GridToWorld(from);
             Vector3 b = GridManager.Instance.GridToWorld(to);
 
             Vector3 dir = (b - a).normalized;
+
+            a += dir * shrink;
+            b -= dir * shrink;
+
             Vector3 right = Vector3.Cross(Vector3.up, dir) * (width * 0.5f);
 
             Vector3 v0 = a - right + Vector3.up * height;
@@ -94,17 +102,19 @@ public class PathArrowRenderer : MonoBehaviour
 
             vertIndex += 4;
 
-            // ===== CORNER DETECTION =====
-            if (i < path.Count - 2)
+            // ===== DETECTAR ESQUINA =====
+            if (i < path.Count - 1)
             {
-                Vector2Int nextDir = path[i + 2] - to;
-                Vector2Int currDir = to - from;
+                Vector2Int next = path[i + 1];
 
-                if (currDir != nextDir)
-                {
-                    PlaceCorner(to, currDir, nextDir);
-                }
+                Vector2Int dirA = to - from;
+                Vector2Int dirB = next - to;
+
+                if (dirA != dirB)
+                    PlaceCorner(to, dirA, dirB);
             }
+
+            from = to;
         }
 
         mesh.SetVertices(vertices);
@@ -121,6 +131,9 @@ public class PathArrowRenderer : MonoBehaviour
         Vector2Int fromDir,
         Vector2Int toDir)
     {
+        if (cornerPrefab == null)
+            return;
+
         GameObject corner = Instantiate(cornerPrefab, transform);
         Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
         pos.y += height;
@@ -132,33 +145,40 @@ public class PathArrowRenderer : MonoBehaviour
         corners.Add(corner);
     }
 
+    // Tu sprite base es: UP -> RIGHT
     private float GetCornerRotation(Vector2Int from, Vector2Int to)
     {
-        // Base sprite: RIGHT -> DOWN
-        if (from == Vector2Int.right && to == Vector2Int.down) return 0;
-        if (from == Vector2Int.down && to == Vector2Int.left) return 90;
-        if (from == Vector2Int.left && to == Vector2Int.up) return 180;
-        if (from == Vector2Int.up && to == Vector2Int.right) return 270;
+        if (from == Vector2Int.up && to == Vector2Int.right) return 0f;
+        if (from == Vector2Int.right && to == Vector2Int.down) return 90f;
+        if (from == Vector2Int.down && to == Vector2Int.left) return 180f;
+        if (from == Vector2Int.left && to == Vector2Int.up) return 270f;
 
-        if (from == Vector2Int.down && to == Vector2Int.right) return 270;
-        if (from == Vector2Int.left && to == Vector2Int.down) return 180;
-        if (from == Vector2Int.up && to == Vector2Int.left) return 90;
-        if (from == Vector2Int.right && to == Vector2Int.up) return 0;
+        // Curvas inversas
+        if (from == Vector2Int.right && to == Vector2Int.up) return 270f;
+        if (from == Vector2Int.down && to == Vector2Int.right) return 180f;
+        if (from == Vector2Int.left && to == Vector2Int.down) return 90f;
+        if (from == Vector2Int.up && to == Vector2Int.left) return 0f;
 
-        return 0;
+        return 0f;
     }
 
     // ================= ARROW HEAD =================
 
-    private void PlaceArrowHead(List<Vector2Int> path)
+    private void PlaceArrowHead(Vector2Int start, List<Vector2Int> path)
     {
+        if (arrowHeadPrefab == null || path.Count == 0)
+            return;
+
         if (arrowHeadInstance == null)
             arrowHeadInstance = Instantiate(arrowHeadPrefab, transform);
 
-        Vector3 end = GridManager.Instance.GridToWorld(path[^1]);
-        Vector3 prev = GridManager.Instance.GridToWorld(path[^2]);
+        Vector2Int last = path[^1];
+        Vector2Int prev = (path.Count >= 2) ? path[^2] : start;
 
-        Vector3 dir = (end - prev).normalized;
+        Vector3 end = GridManager.Instance.GridToWorld(last);
+        Vector3 before = GridManager.Instance.GridToWorld(prev);
+
+        Vector3 dir = (end - before).normalized;
 
         arrowHeadInstance.transform.position =
             end + Vector3.up * height;

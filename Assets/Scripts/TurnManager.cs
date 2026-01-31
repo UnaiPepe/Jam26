@@ -25,6 +25,8 @@ public class TurnManager : MonoBehaviour
         CurrentState = TurnState.Planning;
     }
 
+    // ================= TURN FLOW =================
+
     // Called by the Move button
     public void StartMovementExecution()
     {
@@ -32,15 +34,21 @@ public class TurnManager : MonoBehaviour
             return;
 
         CurrentState = TurnState.MovementExecution;
-        MovementExecution.Instance.Begin();
+
+        if (MovementExecution.Instance != null)
+            MovementExecution.Instance.Begin();
     }
 
-    // Called by MovementExecution
+    // Called by MovementExecution when ALL units finished moving
     public void EndMovementExecution()
     {
-        CurrentState = TurnState.ActionPhase;
-        Debug.Log("Movement finished. Action phase pending.");
+        // Volvemos a planificación para permitir seleccionar otra vez
+        CurrentState = TurnState.Planning;
+
+        Debug.Log("Movement finished. Back to planning.");
     }
+
+    // ================= HELPERS =================
 
     // Used by MovementPreview to block input
     public bool IsExecutingMovement()

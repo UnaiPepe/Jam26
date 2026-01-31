@@ -5,17 +5,18 @@ public class Unit : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-
     public int movementRange = 5;
 
-    // Posicion en el grid
+    // Grid position
     public Vector2Int GridPosition { get; private set; }
 
-    // Planificacion (usada por MovementExecution)
+    // Planning
     public bool HasPlannedMovement { get; private set; }
     public Vector2Int PlannedDestination { get; private set; }
 
     private bool isMoving;
+    private bool wasPushedThisTurn;
+    private bool stunnedThisTurn;
 
     private void Start()
     {
@@ -23,7 +24,8 @@ public class Unit : MonoBehaviour
         transform.position = GridManager.Instance.GridToWorld(GridPosition);
     }
 
-    // ================= PLANIFICACION =================
+    // ================= PLANNING =================
+
     public void SetPlannedDestination(Vector2Int destination)
     {
         PlannedDestination = destination;
@@ -35,14 +37,44 @@ public class Unit : MonoBehaviour
         HasPlannedMovement = false;
     }
 
-    // ================= MOVIMIENTO =================
+    // ================= MOVEMENT =================
+
     public bool IsMoving()
     {
         return isMoving;
     }
 
-    // Llamado por MovementExecution
+    // Called by MovementExecution
     public void MoveOneStep(Vector2Int targetGridPos, System.Action onFinished)
+    {
+        if (isMoving)
+            return;
+
+        // If stunned, do not continue original movement
+        if (stunnedThisTurn)
+        {
+            onFinished?.Invoke();
+            return;
+        }
+
+        Unit other = GetUnitAt(targetGridPos);
+
+        if (other != null && other != this)
+        {
+            ResolveCollision(other, targetGridPos, onFinished);
+            return;
+        }
+
+        Vector3 targetWorldPos =
+            GridManager.Instance.GridToWorld(targetGridPos);
+
+        StartCoroutine(
+            MoveCoroutine(targetGridPos, targetWorldPos, onFinished)
+        );
+    }
+
+    // Forced movement (push)
+    private void ForceMove(Vector2Int targetGridPos, System.Action onFinished)
     {
         if (isMoving)
             return;
@@ -54,6 +86,106 @@ public class Unit : MonoBehaviour
             MoveCoroutine(targetGridPos, targetWorldPos, onFinished)
         );
     }
+
+    // ================= COLLISION =================
+
+    private void ResolveCollision(
+        Unit other,
+        Vector2Int collisionPos,
+        System.Action onFinished)
+    {
+        // If this unit was pushed before, it always loses
+        if (wasPushedThisTurn)
+        {
+            ResolvePush(this, other, collisionPos, onFinished);
+            return;
+        }
+
+        // If the other unit was pushed before, it always loses
+        if (other.wasPushedThisTurn)
+        {
+            ResolvePush(other, this, collisionPos, onFinished);
+            return;
+        }
+
+        // Normal case: random loser
+        bool thisLoses = Random.value < 0.5f;
+
+        Unit loser = thisLoses ? this : other;
+        Unit winner = thisLoses ? other : this;
+
+        ResolvePush(loser, winner, collisionPos, onFinished);
+    }
+
+    private void ResolvePush(
+        Unit loser,
+        Unit winner,
+        Vector2Int collisionPos,
+        System.Action onFinished)
+    {
+        Vector2Int pushDir =
+            loser.GridPosition - winner.GridPosition;
+
+        pushDir = new Vector2Int(
+            Mathf.Clamp(pushDir.x, -1, 1),
+            Mathf.Clamp(pushDir.y, -1, 1)
+        );
+
+        Vector2Int pushTarget = loser.GridPosition + pushDir;
+
+        // If push is not possible, no one moves
+        if (!GridManager.Instance.IsInsideGrid(pushTarget) ||
+            GetUnitAt(pushTarget) != null)
+        {
+            onFinished?.Invoke();
+            return;
+        }
+
+        // Mark loser as pushed and stunned
+        loser.wasPushedThisTurn = true;
+        loser.stunnedThisTurn = true;
+        loser.ClearPlannedMovement();
+
+        loser.ForceMove(pushTarget, () =>
+        {
+            if (winner == this)
+            {
+                Vector3 worldPos =
+                    GridManager.Instance.GridToWorld(collisionPos);
+
+                StartCoroutine(
+                    MoveCoroutine(collisionPos, worldPos, onFinished)
+                );
+            }
+            else
+            {
+                onFinished?.Invoke();
+            }
+        });
+    }
+
+    // ================= UTIL =================
+
+    private Unit GetUnitAt(Vector2Int gridPos)
+    {
+        Unit[] units = FindObjectsOfType<Unit>();
+
+        foreach (Unit u in units)
+        {
+            if (u != this && u.GridPosition == gridPos && !u.isMoving)
+                return u;
+        }
+
+        return null;
+    }
+
+    public void ResetPushState()
+    {
+        wasPushedThisTurn = false;
+        stunnedThisTurn = false;
+    }
+
+    // ================= COROUTINE =================
 
     private IEnumerator MoveCoroutine(
         Vector2Int targetGridPos,

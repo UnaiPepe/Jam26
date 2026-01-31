@@ -110,9 +110,15 @@ public class MovementPreview : MonoBehaviour
         data.ghost.SetActive(true);
 
         List<Vector2Int> path =
-            Pathfinder.FindPath(selectedUnit.GridPosition, gridPos);
+        Pathfinder.FindPath(selectedUnit.GridPosition, gridPos);
 
-        data.arrow.RenderPath(path);
+        if (path.Count >= 2)
+        {
+            // Quitamos la última casilla (la del fantasma)
+            path.RemoveAt(path.Count - 1);
+        }
+
+        data.arrow.RenderPath(selectedUnit.GridPosition, path);
     }
 
     // ================= VISUAL =================

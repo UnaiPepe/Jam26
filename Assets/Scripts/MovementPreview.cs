@@ -9,9 +9,11 @@ public class MovementPreview : MonoBehaviour
     [Header("Prefabs")]
     public GameObject tilePrefab;
     public GameObject ghostPrefab;
+
+    [Header("Arrow Prefabs")]
+    public GameObject arrowBodyPrefab;
+    public GameObject arrowCornerPrefab;
     public GameObject arrowHeadPrefab;
-    public GameObject cornerPrefab;
-    public Material arrowBodyMaterial;
 
     private Unit selectedUnit;
 
@@ -56,7 +58,6 @@ public class MovementPreview : MonoBehaviour
 
         if (selectedUnit != null)
         {
-            // Si el click ha sido sobre un enemigo, no hacer nada
             Unit clickedUnit = hit.collider.GetComponent<Unit>();
             if (clickedUnit != null && clickedUnit.GetComponent<Enemy>() != null)
                 return;
@@ -75,7 +76,7 @@ public class MovementPreview : MonoBehaviour
         }
 
         Unit unit = hit.collider.GetComponent<Unit>();
-        if (unit != null && unit.GetComponent<Enemy>() == null) 
+        if (unit != null && unit.GetComponent<Enemy>() == null)
         {
             SelectUnit(unit);
         }
@@ -117,13 +118,10 @@ public class MovementPreview : MonoBehaviour
         data.ghost.SetActive(true);
 
         List<Vector2Int> path =
-        Pathfinder.FindPath(selectedUnit.GridPosition, gridPos);
+            Pathfinder.FindPath(selectedUnit.GridPosition, gridPos);
 
         if (path.Count >= 2)
-        {
-            // Quitamos la última casilla (la del fantasma)
             path.RemoveAt(path.Count - 1);
-        }
 
         data.arrow.RenderPath(selectedUnit.GridPosition, path);
     }
@@ -202,10 +200,9 @@ public class MovementPreview : MonoBehaviour
         arrowGO.transform.SetParent(transform);
 
         var arrow = arrowGO.AddComponent<PathArrowRenderer>();
+        arrow.arrowBodyPrefab = arrowBodyPrefab;
+        arrow.arrowCornerPrefab = arrowCornerPrefab;
         arrow.arrowHeadPrefab = arrowHeadPrefab;
-        arrow.cornerPrefab = cornerPrefab;
-
-        arrowGO.GetComponent<MeshRenderer>().material = arrowBodyMaterial;
 
         unitGhosts[unit] = new GhostData
         {

@@ -1,32 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class PathArrowRenderer : MonoBehaviour
 {
-    [Header("Body")]
-    public float width = 0.2f;     // grosor del cuerpo
-    public float height = 0.3f;    // altura sobre el suelo
+    [Header("Visual")]
+    public float height = 0.05f;
 
     [Header("Prefabs")]
+    public GameObject arrowBodyPrefab;
+    public GameObject arrowCornerPrefab;
     public GameObject arrowHeadPrefab;
-    public GameObject cornerPrefab;
 
-    private Mesh mesh;
-    private GameObject arrowHeadInstance;
-    private readonly List<GameObject> corners = new();
-
-    private void Awake()
-    {
-        mesh = new Mesh();
-        mesh.name = "PathArrowMesh";
-        GetComponent<MeshFilter>().mesh = mesh;
-    }
+    private readonly List<GameObject> spawned = new();
 
     // ================= PUBLIC API =================
 
-    // start = casilla de la unidad
-    // path = pasos HASTA ANTES del fantasma
+    // start = posición inicial de la unidad
+    // path  = lista de celdas HASTA el destino (sin incluir la celda de la unidad)
     public void RenderPath(Vector2Int start, List<Vector2Int> path)
     {
         Clear();
@@ -34,118 +24,125 @@ public class PathArrowRenderer : MonoBehaviour
         if (path == null || path.Count == 0)
             return;
 
-        BuildBodyAndCorners(start, path);
-        PlaceArrowHead(start, path);
-    }
-
-    public void Clear()
-    {
-        mesh.Clear();
-
-        if (arrowHeadInstance != null)
-            arrowHeadInstance.SetActive(false);
-
-        foreach (var c in corners)
-            Destroy(c);
-        corners.Clear();
-    }
-
-    // ================= BODY + CORNERS =================
-
-    private void BuildBodyAndCorners(Vector2Int start, List<Vector2Int> path)
-    {
-        List<Vector3> vertices = new();
-        List<int> triangles = new();
-        List<Vector2> uvs = new();
-
-        int vertIndex = 0;
-        float shrink = 0.015f; // pequeño, para no crear huecos
-
         Vector2Int from = start;
 
         for (int i = 0; i < path.Count; i++)
         {
-            Vector2Int to = path[i];
+            Vector2Int current = path[i];
+            Vector2Int dir = current - from;
 
-            Vector3 a = GridManager.Instance.GridToWorld(from);
-            Vector3 b = GridManager.Instance.GridToWorld(to);
+            bool isLast = i == path.Count - 1;
+            bool hasTurn = false;
 
-            Vector3 dir = (b - a).normalized;
-
-            a += dir * shrink;
-            b -= dir * shrink;
-
-            Vector3 right = Vector3.Cross(Vector3.up, dir) * (width * 0.5f);
-
-            Vector3 v0 = a - right + Vector3.up * height;
-            Vector3 v1 = a + right + Vector3.up * height;
-            Vector3 v2 = b - right + Vector3.up * height;
-            Vector3 v3 = b + right + Vector3.up * height;
-
-            vertices.Add(v0);
-            vertices.Add(v1);
-            vertices.Add(v2);
-            vertices.Add(v3);
-
-            triangles.Add(vertIndex + 0);
-            triangles.Add(vertIndex + 2);
-            triangles.Add(vertIndex + 1);
-
-            triangles.Add(vertIndex + 1);
-            triangles.Add(vertIndex + 2);
-            triangles.Add(vertIndex + 3);
-
-            uvs.Add(new Vector2(0, 0));
-            uvs.Add(new Vector2(1, 0));
-            uvs.Add(new Vector2(0, 1));
-            uvs.Add(new Vector2(1, 1));
-
-            vertIndex += 4;
-
-            // ===== DETECTAR ESQUINA =====
-            if (i < path.Count - 1)
+            if (!isLast)
             {
-                Vector2Int next = path[i + 1];
-
-                Vector2Int dirA = to - from;
-                Vector2Int dirB = next - to;
-
-                if (dirA != dirB)
-                    PlaceCorner(to, dirA, dirB);
+                Vector2Int nextDir = path[i + 1] - current;
+                hasTurn = nextDir != dir;
             }
 
-            from = to;
+            if (isLast)
+            {
+                PlaceArrowHead(current, dir);
+            }
+            else if (hasTurn)
+            {
+                PlaceCorner(current, dir, path[i + 1] - current);
+            }
+            else
+            {
+                PlaceBody(current, dir);
+            }
+
+            from = current;
         }
-
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
-        mesh.SetUVs(0, uvs);
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
     }
 
-    // ================= CORNER =================
-
-    private void PlaceCorner(
-        Vector2Int gridPos,
-        Vector2Int fromDir,
-        Vector2Int toDir)
+    public void Clear()
     {
-        if (cornerPrefab == null)
-            return;
+        foreach (var go in spawned)
+            Destroy(go);
 
-        GameObject corner = Instantiate(cornerPrefab, transform);
-        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
-        pos.y += height;
-        corner.transform.position = pos;
-
-        float rot = GetCornerRotation(fromDir, toDir);
-        corner.transform.rotation = Quaternion.Euler(90f, rot, 0f);
-
-        corners.Add(corner);
+        spawned.Clear();
     }
 
-    // Tu sprite base es: UP -> RIGHT
+    // ================= PLACEMENT =================
+
+    private void PlaceBody(Vector2Int gridPos, Vector2Int dir)
+    {
+        GameObject body = Instantiate(arrowBodyPrefab, transform);
+        SetupTransform(body, gridPos, GetDirAngle(dir));
+    }
+
+    private void PlaceArrowHead(Vector2Int gridPos, Vector2Int dir)
+    {
+        GameObject head = Instantiate(arrowHeadPrefab, transform);
+        SetupTransform(head, gridPos, GetDirAngle(dir));
+    }
+
+    private void PlaceCorner(Vector2Int gridPos, Vector2Int fromDir, Vector2Int toDir)
+    {
+        GameObject corner = Instantiate(arrowCornerPrefab, transform);
+
+        float rot;
+        bool flipX;
+
+        GetCornerTransform(fromDir, toDir, out rot, out flipX);
+
+        SetupTransform(corner, gridPos, rot);
+
+        if (flipX)
+        {
+            Vector3 s = corner.transform.localScale;
+            s.x *= -1f;
+            corner.transform.localScale = s;
+        }
+    }
+
+    private void GetCornerTransform( Vector2Int from, Vector2Int to, out float rotY, out bool flipX)
+    {
+        flipX = false;
+
+        // Giro horario
+        if (from == Vector2Int.up && to == Vector2Int.right) { rotY = 0f; return; }
+        if (from == Vector2Int.right && to == Vector2Int.down) { rotY = 90f; return; }
+        if (from == Vector2Int.down && to == Vector2Int.left) { rotY = 180f; return; }
+        if (from == Vector2Int.left && to == Vector2Int.up) { rotY = 270f; return; }
+
+        // Giro antihorario (NECESITA FLIP)
+        if (from == Vector2Int.right && to == Vector2Int.up) { rotY = 0f; flipX = true; return; }
+        if (from == Vector2Int.down && to == Vector2Int.right) { rotY = 90f; flipX = true; return; }
+        if (from == Vector2Int.left && to == Vector2Int.down) { rotY = 180f; flipX = true; return; }
+        if (from == Vector2Int.up && to == Vector2Int.left) { rotY = 270f; flipX = true; return; }
+
+        rotY = 0f;
+    }
+
+
+    private void SetupTransform(GameObject go, Vector2Int gridPos, float rotY)
+    {
+        go.transform.position =
+            GridManager.Instance.GridToWorld(gridPos) + Vector3.up * height;
+
+        go.transform.rotation =
+            Quaternion.Euler(90f, rotY, 0f);
+
+        spawned.Add(go);
+    }
+
+    // ================= ROTATION =================
+
+    private float GetDirAngle(Vector2Int dir)
+    {
+        if (dir == Vector2Int.up) return 0f;
+        if (dir == Vector2Int.right) return 90f;
+        if (dir == Vector2Int.down) return 180f;
+        if (dir == Vector2Int.left) return 270f;
+
+        return 0f;
+    }
+
+    /*
+    // Asume que el sprite base de la esquina es: UP -> RIGHT
     private float GetCornerRotation(Vector2Int from, Vector2Int to)
     {
         if (from == Vector2Int.up && to == Vector2Int.right) return 0f;
@@ -161,32 +158,5 @@ public class PathArrowRenderer : MonoBehaviour
 
         return 0f;
     }
-
-    // ================= ARROW HEAD =================
-
-    private void PlaceArrowHead(Vector2Int start, List<Vector2Int> path)
-    {
-        if (arrowHeadPrefab == null || path.Count == 0)
-            return;
-
-        if (arrowHeadInstance == null)
-            arrowHeadInstance = Instantiate(arrowHeadPrefab, transform);
-
-        Vector2Int last = path[^1];
-        Vector2Int prev = (path.Count >= 2) ? path[^2] : start;
-
-        Vector3 end = GridManager.Instance.GridToWorld(last);
-        Vector3 before = GridManager.Instance.GridToWorld(prev);
-
-        Vector3 dir = (end - before).normalized;
-
-        arrowHeadInstance.transform.position =
-            end + Vector3.up * height;
-
-        float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-        arrowHeadInstance.transform.rotation =
-            Quaternion.Euler(90f, angle, 0f);
-
-        arrowHeadInstance.SetActive(true);
-    }
+    */
 }

@@ -18053,7 +18053,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   introClip: {fileID: 8300000, guid: 2cf77207d5bea4746b7e0cfa00bfe6b3, type: 3}
   mainLoopClip: {fileID: 8300000, guid: 2cc074a2761f2214784ee7eff30bbed9, type: 3}
-  backgroundMusic: {fileID: 0}
+  backgroundMusic: {fileID: 8300000, guid: b2c85f8bde9fe764fbebf87d43da40c8, type: 3}
   ambientClip: {fileID: 8300000, guid: 666f11568a2d20d42bc99bae8b8ac67f, type: 3}
   ambientVolume: 0.3
   ambientFadeInTime: 2
@@ -24843,6 +24843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941bf3f54300162499fc367012264a1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _allCharacters: []
 --- !u!1001 &1096482284
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -100926,6 +100927,10 @@ PrefabInstance:
       propertyPath: centerDriftSpeed
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 8827704434412379396, guid: 5f27b1ce685174e4983c1d91a66ef7b2, type: 3}
+      propertyPath: announcementClip2
+      value: 
+      objectReference: {fileID: 8300000, guid: 029841bc20c241541bafb4734e6928fd, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -101047,6 +101052,10 @@ PrefabInstance:
       propertyPath: centerDriftSpeed
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 6825700418063576075, guid: 737841c8c3348584ba4955f919ff8a7c, type: 3}
+      propertyPath: announcementClip2
+      value: 
+      objectReference: {fileID: 8300000, guid: 2334549432539914a9cd3a7b54c2e8b0, type: 3}
     - target: {fileID: 8168236799283636874, guid: 737841c8c3348584ba4955f919ff8a7c, type: 3}
       propertyPath: m_fontSize
       value: 327.45
@@ -101430,6 +101439,10 @@ PrefabInstance:
       propertyPath: centerDriftSpeed
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 7201552308264807340, guid: 73cee589d40d2d54f95ffbb596294b06, type: 3}
+      propertyPath: announcementClip2
+      value: 
+      objectReference: {fileID: 8300000, guid: de1fefabd07f4654087ae807a59a8c89, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -101556,6 +101569,10 @@ PrefabInstance:
       propertyPath: centerDriftSpeed
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 903568486168930900, guid: 867b10775af70d84db8786f269cac3ca, type: 3}
+      propertyPath: announcementClip2
+      value: 
+      objectReference: {fileID: 8300000, guid: 0c3e8b76ac7ada74e86d702f68d433ef, type: 3}
     - target: {fileID: 2401012310862099980, guid: 867b10775af70d84db8786f269cac3ca, type: 3}
       propertyPath: m_Name
       value: Start!!

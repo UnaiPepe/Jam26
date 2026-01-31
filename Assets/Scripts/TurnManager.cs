@@ -25,6 +25,27 @@ public class TurnManager : MonoBehaviour
         CurrentState = TurnState.Planning;
     }
 
+    // ================= CAMBIO DE ESTADOS =================
+
+    public void SetStatePlanning()
+    {
+        CurrentState = TurnState.Planning;
+        Debug.Log("Estado -> PLANNING");
+    }
+
+    public void SetStateAction()
+    {
+        CurrentState = TurnState.ActionPhase;
+        Debug.Log("Estado -> ACTION");
+    }
+
+    public void SetStateExecution()
+    {
+        CurrentState = TurnState.MovementExecution;
+        Debug.Log("Estado -> EXECUTION");
+    }
+
+
     // ================= TURN FLOW =================
 
     // Called by the Move button

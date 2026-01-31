@@ -1,0 +1,135 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+
+public class TurnFlowUI : MonoBehaviour
+{
+    [Header("UI")]
+    public GameObject movimientoButton;
+    public GameObject startButton;
+    
+
+    private Unit selectedPlayer;
+
+    void Start()
+    {
+        movimientoButton.SetActive(false);
+        startButton.SetActive(false);
+        
+    }
+
+    void Update()
+    {
+        if (TurnManager.Instance == null) return;
+
+        // Durante Planning: si hay unidad seleccionada con destino, muestra Movimiento
+        if (TurnManager.Instance.CurrentState == TurnState.Planning)
+        {
+            if (selectedPlayer != null && selectedPlayer.HasPlannedMovement)
+                movimientoButton.SetActive(true);
+            else
+                movimientoButton.SetActive(false);
+        }
+    }
+
+    // Llamar desde MovementPreview cuando seleccionas un player (o desde tu evento)
+    public void SetSelectedPlayer(Unit u)
+    {
+        selectedPlayer = u;
+    }
+
+    // BOTÓN Movimiento: pasa a ActionPhase
+    public void OnMovimiento()
+    {
+        if (selectedPlayer == null) return;
+        if (!selectedPlayer.HasPlannedMovement) return;
+
+        TurnManager.Instance.SetStateAction(); // te digo abajo cómo
+        movimientoButton.SetActive(false);
+
+        
+        startButton.SetActive(true);
+
+        ActionPreview.Instance.EnterAction(selectedPlayer);
+    }
+
+    // BOTONES DIRECCIÓN
+    public void DirUp() => ActionPreview.Instance.SetDirection(new Vector2Int(0, 1));
+    public void DirDown() => ActionPreview.Instance.SetDirection(new Vector2Int(0, -1));
+    public void DirLeft() => ActionPreview.Instance.SetDirection(new Vector2Int(-1, 0));
+    public void DirRight() => ActionPreview.Instance.SetDirection(new Vector2Int(1, 0));
+
+    // BOTÓN Start: ejecuta movimiento + ataque + enemigos
+    public void OnStart()
+    {
+        if (selectedPlayer == null) return;
+        if (!ActionPreview.Instance.HasDirection) return;
+
+       
+        startButton.SetActive(false);
+
+        StartCoroutine(ExecuteTurn());
+    }
+
+    IEnumerator ExecuteTurn()
+    {
+        // Bloquear input: estado ejecución
+        TurnManager.Instance.SetStateExecution();
+
+        // 1) mover jugador
+        yield return StartCoroutine(MovePlannedUnit(selectedPlayer));
+        selectedPlayer.ClearPlannedMovement();
+
+        // 2) atacar con dirección elegida
+        PerformLineAttackFrom(selectedPlayer.GridPosition, ActionPreview.Instance.SelectedDir);
+
+        // 3) mover enemigos (planificados)
+        MovementExecution.Instance.BeginEnemiesOnly();
+        while (MovementExecution.Instance.IsRunning) yield return null;
+
+        // limpiar preview
+        ActionPreview.Instance.ExitAction();
+
+        // volver a Planning
+        TurnManager.Instance.SetStatePlanning();
+        selectedPlayer = null;
+    }
+
+    IEnumerator MovePlannedUnit(Unit unit)
+    {
+        List<Vector2Int> path = Pathfinder.FindPath(unit.GridPosition, unit.PlannedDestination);
+        if (path == null || path.Count == 0) yield break;
+
+        if (path[0] == unit.GridPosition)
+            path.RemoveAt(0);
+
+        foreach (var step in path)
+        {
+            bool finished = false;
+            unit.MoveOneStep(step, () => finished = true);
+            while (!finished) yield return null;
+        }
+    }
+
+    void PerformLineAttackFrom(Vector2Int origin, Vector2Int dir)
+    {
+        List<Vector2Int> area = new()
+        {
+            origin + dir * 1,
+            origin + dir * 2,
+            origin + dir * 3,
+        };
+
+        foreach (var gp in area)
+        {
+            if (!GridManager.Instance.IsInsideGrid(gp)) continue;
+
+            foreach (Unit u in FindObjectsOfType<Unit>())
+            {
+                if (u.GridPosition == gp)
+                    Debug.Log($"[HIT] Golpea a {u.name} en {gp}");
+            }
+        }
+    }
+}

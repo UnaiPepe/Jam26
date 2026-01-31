@@ -5,6 +5,7 @@ using UnityEngine;
 public class MovementExecution : MonoBehaviour
 {
     public static MovementExecution Instance;
+    public bool IsRunning { get; private set; }
 
     private class UnitMoveData
     {
@@ -23,6 +24,7 @@ public class MovementExecution : MonoBehaviour
     // Llamado por TurnManager o por un boton
     public void Begin()
     {
+        IsRunning = true;
         units.Clear();
 
         foreach (Unit u in FindObjectsOfType<Unit>())
@@ -51,6 +53,7 @@ public class MovementExecution : MonoBehaviour
 
     public void BeginEnemiesOnly()
     {
+        IsRunning = true;
         units.Clear();
 
         foreach (Unit u in FindObjectsOfType<Unit>())
@@ -117,6 +120,7 @@ public class MovementExecution : MonoBehaviour
 
     private void EndExecution()
     {
+        IsRunning = false;
         units.Clear();
 
         if (TurnManager.Instance != null)

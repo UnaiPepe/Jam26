@@ -88,6 +88,7 @@ public class MovementPreview : MonoBehaviour
     {
         ClearTiles();
         selectedUnit = unit;
+        FindObjectOfType<TurnFlowUI>()?.SetSelectedPlayer(unit);
 
         if (!unitGhosts.ContainsKey(unit))
             CreateGhostData(unit);
@@ -108,6 +109,8 @@ public class MovementPreview : MonoBehaviour
         GhostData data = unitGhosts[selectedUnit];
 
         selectedUnit.SetPlannedDestination(gridPos);
+        FindObjectOfType<TurnFlowUI>()?.SetSelectedPlayer(selectedUnit);
+        Debug.Log($"[MovementPreview] Planned: {selectedUnit.name} -> {gridPos}  HasPlannedMovement={selectedUnit.HasPlannedMovement}");
 
         data.hasDestination = true;
         data.destination = gridPos;

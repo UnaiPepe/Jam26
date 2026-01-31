@@ -4,7 +4,9 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private Unit unit;
-    private bool plannedThisPlanning = false;
+
+    // Para no planificar más de una vez por turno
+    private int lastPlannedTurn = -1;
 
     private void Awake()
     {
@@ -19,27 +21,20 @@ public class Enemy : MonoBehaviour
         if (TurnManager.Instance == null)
             return;
 
-        // Solo NPCs usan este script
+        // Solo NPC
         if (unit.team != Unit.Team.NPC)
             return;
 
-        // Solo actúa durante Planning
-        if (TurnManager.Instance.CurrentState != TurnState.Planning)
-        {
-            plannedThisPlanning = false;
-            return;
-        }
-
-        // Solo planifica en su turno
-        if (TurnManager.Instance.CurrentTeamTurn != TeamTurn.NPC)
+        // Solo durante Planning
+        if (!TurnManager.Instance.IsPlanning())
             return;
 
-        // Planifica una sola vez por turno
-        if (plannedThisPlanning)
+        // Ya planificó en este turno
+        if (lastPlannedTurn == TurnManager.Instance.TurnCounter)
             return;
 
         PlanAndTelegraph();
-        plannedThisPlanning = true;
+        lastPlannedTurn = TurnManager.Instance.TurnCounter;
     }
 
     // ================= AI =================
@@ -99,7 +94,6 @@ public class Enemy : MonoBehaviour
             if (u == unit)
                 continue;
 
-            // Objetivo = cualquier unidad que NO sea NPC
             if (u.team == Unit.Team.NPC)
                 continue;
 

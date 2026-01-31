@@ -209,6 +209,10 @@ PrefabInstance:
       value: Test_Luchador_Prefab (2)
       objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: moveSpeed
       value: 7
       objectReference: {fileID: 0}

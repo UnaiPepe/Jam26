@@ -1,5 +1,6 @@
-﻿using NUnit.Framework.Interfaces;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public enum TeamTurn
 {
@@ -13,15 +14,23 @@ public enum TurnState
     Planning,
     MovementExecution
 }
+
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance;
 
-
-
-
     public TurnState CurrentState { get; private set; }
     public TeamTurn CurrentTeamTurn { get; private set; }
+
+    // Contador global de turnos (CLAVE)
+    public int TurnCounter { get; private set; }
+
+    // Solo jugadores humanos tienen turno
+    private readonly TeamTurn[] playerTurnOrder =
+    {
+        TeamTurn.Jugador1,
+        TeamTurn.Jugador2
+    };
 
     private void Awake()
     {
@@ -30,88 +39,150 @@ public class TurnManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
+        List<TeamTurn> alivePlayers = GetAlivePlayerTeams();
+
+        if (alivePlayers.Count == 0)
+        {
+            Debug.LogError("No hay jugadores vivos al iniciar la partida");
+            return;
+        }
+
+        CurrentTeamTurn = alivePlayers[0];
         CurrentState = TurnState.Planning;
-        CurrentTeamTurn = TeamTurn.Jugador1;
+        TurnCounter = 0;
     }
 
     // ================= TURN FLOW =================
 
-    /// <summary>
-    /// Llamado cuando el jugador confirma el Planning
-    /// </summary>
     public void StartMovementExecution()
     {
         if (CurrentState != TurnState.Planning)
             return;
 
         CurrentState = TurnState.MovementExecution;
-
-        if (MovementExecution.Instance != null)
-            MovementExecution.Instance.Begin();
-        else
-            Debug.LogWarning("MovementExecution.Instance es null");
+        MovementExecution.Instance?.Begin();
     }
 
-    /// <summary>
-    /// Llamado por MovementExecution cuando TODAS las unidades han terminado
-    /// </summary>
     public void EndMovementExecution()
     {
         AdvanceTurn();
     }
 
-    // ================= TURN LOGIC =================
+    // ================= CORE LOGIC =================
 
     private void AdvanceTurn()
     {
-        // Resetear estados temporales de unidades
         ResetUnitsTurnState();
 
-        // Cambiar de equipo
-        switch (CurrentTeamTurn)
+        // 🔚 FIN DE PARTIDA (jugadores + NPC)
+        List<TeamTurn> aliveTeams = GetAliveTeams();
+        if (aliveTeams.Count <= 1)
         {
-            case TeamTurn.Jugador1:
-                CurrentTeamTurn = TeamTurn.Jugador2;
-                break;
-
-            case TeamTurn.Jugador2:
-                CurrentTeamTurn = TeamTurn.NPC;
-                break;
-
-            case TeamTurn.NPC:
-                CurrentTeamTurn = TeamTurn.Jugador1;
-                break;
+            EndGame(aliveTeams[0]);
+            return;
         }
 
+        // 🔄 ROTACIÓN DE TURNOS (solo jugadores vivos)
+        List<TeamTurn> alivePlayers = GetAlivePlayerTeams();
+
+        int index = System.Array.IndexOf(playerTurnOrder, CurrentTeamTurn);
+
+        for (int i = 1; i <= playerTurnOrder.Length; i++)
+        {
+            TeamTurn candidate =
+                playerTurnOrder[(index + i) % playerTurnOrder.Length];
+
+            if (alivePlayers.Contains(candidate))
+            {
+                CurrentTeamTurn = candidate;
+                break;
+            }
+        }
+
+        // 🔑 Nuevo turno
+        TurnCounter++;
         CurrentState = TurnState.Planning;
 
-        Debug.Log("Turno de: " + CurrentTeamTurn);
+        Debug.Log($"Turno {TurnCounter} – Turno de {CurrentTeamTurn}");
     }
 
     // ================= HELPERS =================
 
-    public bool IsPlanning()
+    // Jugadores humanos vivos (para turnos)
+    private List<TeamTurn> GetAlivePlayerTeams()
     {
-        return CurrentState == TurnState.Planning;
+        Unit[] units = FindObjectsOfType<Unit>();
+        HashSet<TeamTurn> alive = new HashSet<TeamTurn>();
+
+        foreach (Unit u in units)
+        {
+            if (!u.gameObject.activeInHierarchy)
+                continue;
+
+            if (u.team == Unit.Team.NPC)
+                continue;
+
+            alive.Add(ConvertTeam(u.team));
+        }
+
+        return alive.ToList();
     }
+
+    // Todos los equipos vivos (para victoria)
+    private List<TeamTurn> GetAliveTeams()
+    {
+        Unit[] units = FindObjectsOfType<Unit>();
+        HashSet<TeamTurn> alive = new HashSet<TeamTurn>();
+
+        foreach (Unit u in units)
+        {
+            if (!u.gameObject.activeInHierarchy)
+                continue;
+
+            alive.Add(ConvertTeam(u.team));
+        }
+
+        return alive.ToList();
+    }
+
+    private TeamTurn ConvertTeam(Unit.Team unitTeam)
+    {
+        return unitTeam switch
+        {
+            Unit.Team.Jugador1 => TeamTurn.Jugador1,
+            Unit.Team.Jugador2 => TeamTurn.Jugador2,
+            Unit.Team.NPC => TeamTurn.NPC,
+            _ => TeamTurn.NPC
+        };
+    }
+
+    private void ResetUnitsTurnState()
+    {
+        foreach (Unit u in FindObjectsOfType<Unit>())
+        {
+            u.ResetPushState();
+            u.ClearPlannedMovement();
+        }
+    }
+
+    private void EndGame(TeamTurn winner)
+    {
+        Debug.Log($"FIN DEL JUEGO – Gana {winner}");
+        // Aquí UI, animaciones, cambio de escena, etc.
+    }
+
+    // ================= STATE HELPERS =================
 
     public bool IsExecutingMovement()
     {
         return CurrentState == TurnState.MovementExecution;
     }
 
-    // ================= INTERNAL =================
-
-    private void ResetUnitsTurnState()
+    public bool IsPlanning()
     {
-        Unit[] units = FindObjectsOfType<Unit>();
-
-        foreach (Unit u in units)
-        {
-            u.ResetPushState();
-            u.ClearPlannedMovement();
-        }
+        return CurrentState == TurnState.Planning;
     }
 }

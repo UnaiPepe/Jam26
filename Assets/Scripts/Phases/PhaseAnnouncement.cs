@@ -117,7 +117,15 @@ namespace Assets.Scripts.Phases
                 yield return null;
             }
 
-            gameObject.SetActive(false);
+            // Deactivate parent (the container GO that PhaseManager references)
+            if (transform.parent != null)
+            {
+                transform.parent.gameObject.SetActive(false);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
             _rectTransform.localPosition = _originalPosition;
         }
 

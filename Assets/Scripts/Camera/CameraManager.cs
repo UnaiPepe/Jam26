@@ -33,6 +33,7 @@ namespace Assets.Scripts.Camera
         private float _shakeTimer;
         private float _shakeTotalDuration;
         private float _startUnscaledMagnitude;
+        private Vector3 _basePosition; // Tracks logical position without shake
         
         private void Awake()
         {
@@ -69,6 +70,7 @@ namespace Assets.Scripts.Camera
                 {
                     targetCamera.position = menuView.position;
                     targetCamera.rotation = menuView.rotation;
+                    _basePosition = menuView.position;
                 }
             }
         }
@@ -85,14 +87,17 @@ namespace Assets.Scripts.Camera
                 _shakeTimer -= Time.deltaTime;
 
                 // Calculate decay (1.0 down to 0.0)
-                float progress = _shakeTimer / _shakeTotalDuration; 
+                float progress = Mathf.Max(0, _shakeTimer / _shakeTotalDuration); 
                 float currentStrength = Mathf.Lerp(0f, _startUnscaledMagnitude, progress);
 
                 shakeOffset = Random.insideUnitSphere * currentStrength;
             }
 
-            // Smoothly interpolate position + Add Shake
-            targetCamera.position = Vector3.Lerp(targetCamera.position, _currentView.position, Time.deltaTime * transitionSpeed) + shakeOffset;
+            // Lerp the BASE position (NOT affected by previous shake)
+            _basePosition = Vector3.Lerp(_basePosition, _currentView.position, Time.deltaTime * transitionSpeed);
+            
+            // Apply shake as temporary visual offset
+            targetCamera.position = _basePosition + shakeOffset;
 
             // Smoothly interpolate rotation
             if (matchRotation)

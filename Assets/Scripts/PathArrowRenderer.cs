@@ -3,20 +3,20 @@ using UnityEngine;
 
 public class PathArrowRenderer : MonoBehaviour
 {
-    [Header("Visual")]
-    public float height = 0.05f;
-
     [Header("Prefabs")]
     public GameObject arrowBodyPrefab;
     public GameObject arrowCornerPrefab;
     public GameObject arrowHeadPrefab;
 
+    [Header("Visual")]
+    public float height = 0.05f;
+
     private readonly List<GameObject> spawned = new();
 
     // ================= PUBLIC API =================
 
-    // start = posición inicial de la unidad
-    // path  = lista de celdas HASTA el destino (sin incluir la celda de la unidad)
+    // start = grid de la unidad
+    // path = pasos SIN incluir el destino final
     public void RenderPath(Vector2Int start, List<Vector2Int> path)
     {
         Clear();
@@ -24,139 +24,119 @@ public class PathArrowRenderer : MonoBehaviour
         if (path == null || path.Count == 0)
             return;
 
+        Vector2Int prevDir = Vector2Int.zero;
         Vector2Int from = start;
 
         for (int i = 0; i < path.Count; i++)
         {
-            Vector2Int current = path[i];
-            Vector2Int dir = current - from;
+            Vector2Int to = path[i];
+            Vector2Int dir = to - from;
 
-            bool isLast = i == path.Count - 1;
-            bool hasTurn = false;
+            GameObject piece;
 
-            if (!isLast)
+            // ¿Es esquina?
+            if (i > 0 && dir != prevDir)
             {
-                Vector2Int nextDir = path[i + 1] - current;
-                hasTurn = nextDir != dir;
-            }
-
-            if (isLast)
-            {
-                PlaceArrowHead(current, dir);
-            }
-            else if (hasTurn)
-            {
-                PlaceCorner(current, dir, path[i + 1] - current);
+                piece = Instantiate(arrowCornerPrefab, transform);
+                piece.transform.rotation = GetCornerRotation(prevDir, dir);
             }
             else
             {
-                PlaceBody(current, dir);
+                piece = Instantiate(arrowBodyPrefab, transform);
+                piece.transform.rotation = GetStraightRotation(dir);
             }
 
-            from = current;
+            Vector3 worldPos = GridManager.Instance.GridToWorld(from);
+            worldPos.y += height;
+            piece.transform.position = worldPos;
+
+            spawned.Add(piece);
+
+            prevDir = dir;
+            from = to;
         }
+
+        // Flecha final (punta)
+        SpawnArrowHead(from, prevDir);
     }
 
     public void Clear()
     {
-        foreach (var go in spawned)
-            Destroy(go);
+        foreach (GameObject go in spawned)
+        {
+            if (go != null)
+                Destroy(go);
+        }
 
         spawned.Clear();
     }
 
-    // ================= PLACEMENT =================
+    // ================= ROTATIONS =================
 
-    private void PlaceBody(Vector2Int gridPos, Vector2Int dir)
+    private Quaternion GetStraightRotation(Vector2Int dir)
     {
-        GameObject body = Instantiate(arrowBodyPrefab, transform);
-        SetupTransform(body, gridPos, GetDirAngle(dir));
+        // SIEMPRE X = 90
+        if (dir == Vector2Int.right) return Quaternion.Euler(90f, 0f, 0f);
+        if (dir == Vector2Int.down) return Quaternion.Euler(90f, 90f, 0f);
+        if (dir == Vector2Int.left) return Quaternion.Euler(90f, 180f, 0f);
+        if (dir == Vector2Int.up) return Quaternion.Euler(90f, 270f, 0f);
+
+        return Quaternion.Euler(90f, 0f, 0f);
     }
 
-    private void PlaceArrowHead(Vector2Int gridPos, Vector2Int dir)
+    private Quaternion GetCornerRotation(Vector2Int from, Vector2Int to)
     {
+        // SIEMPRE X = 90
+
+        // Right -> Down
+        if (from == Vector2Int.right && to == Vector2Int.down)
+            return Quaternion.Euler(90f, 90f, 0f);
+
+        // Down -> Right
+        if (from == Vector2Int.down && to == Vector2Int.right)
+            return Quaternion.Euler(90f, 90f, 0f);
+
+        // Left -> Up
+        if (from == Vector2Int.left && to == Vector2Int.up)
+            return Quaternion.Euler(90f, 270f, 0f);
+
+        // Up -> Left
+        if (from == Vector2Int.up && to == Vector2Int.left)
+            return Quaternion.Euler(90f, 180f, 0f);
+
+        // Right -> Up
+        if (from == Vector2Int.right && to == Vector2Int.up)
+            return Quaternion.Euler(90f, 270f, 0f);
+
+        // Up -> Right
+        if (from == Vector2Int.up && to == Vector2Int.right)
+            return Quaternion.Euler(90f, 0f, 0f);
+
+        // Left -> Down
+        if (from == Vector2Int.left && to == Vector2Int.down)
+            return Quaternion.Euler(90f, 90f, 0f);
+
+        // Down -> Left
+        if (from == Vector2Int.down && to == Vector2Int.left)
+            return Quaternion.Euler(90f, 180f, 0f);
+
+        return Quaternion.Euler(90f, 0f, 0f);
+    }
+
+    // ================= ARROW HEAD =================
+
+    private void SpawnArrowHead(Vector2Int gridPos, Vector2Int dir)
+    {
+        if (arrowHeadPrefab == null)
+            return;
+
         GameObject head = Instantiate(arrowHeadPrefab, transform);
-        SetupTransform(head, gridPos, GetDirAngle(dir));
+        head.transform.rotation = GetStraightRotation(dir);
+
+        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
+        pos.y += height;
+        head.transform.position = pos;
+
+        spawned.Add(head);
     }
-
-    private void PlaceCorner(Vector2Int gridPos, Vector2Int fromDir, Vector2Int toDir)
-    {
-        GameObject corner = Instantiate(arrowCornerPrefab, transform);
-
-        float rot;
-        bool flipX;
-
-        GetCornerTransform(fromDir, toDir, out rot, out flipX);
-
-        SetupTransform(corner, gridPos, rot);
-
-        if (flipX)
-        {
-            Vector3 s = corner.transform.localScale;
-            s.x *= -1f;
-            corner.transform.localScale = s;
-        }
-    }
-
-    private void GetCornerTransform( Vector2Int from, Vector2Int to, out float rotY, out bool flipX)
-    {
-        flipX = false;
-
-        // Giro horario
-        if (from == Vector2Int.up && to == Vector2Int.right) { rotY = 0f; return; }
-        if (from == Vector2Int.right && to == Vector2Int.down) { rotY = 90f; return; }
-        if (from == Vector2Int.down && to == Vector2Int.left) { rotY = 180f; return; }
-        if (from == Vector2Int.left && to == Vector2Int.up) { rotY = 270f; return; }
-
-        // Giro antihorario (NECESITA FLIP)
-        if (from == Vector2Int.right && to == Vector2Int.up) { rotY = 0f; flipX = true; return; }
-        if (from == Vector2Int.down && to == Vector2Int.right) { rotY = 90f; flipX = true; return; }
-        if (from == Vector2Int.left && to == Vector2Int.down) { rotY = 180f; flipX = true; return; }
-        if (from == Vector2Int.up && to == Vector2Int.left) { rotY = 270f; flipX = true; return; }
-
-        rotY = 0f;
-    }
-
-
-    private void SetupTransform(GameObject go, Vector2Int gridPos, float rotY)
-    {
-        go.transform.position =
-            GridManager.Instance.GridToWorld(gridPos) + Vector3.up * height;
-
-        go.transform.rotation =
-            Quaternion.Euler(90f, rotY, 0f);
-
-        spawned.Add(go);
-    }
-
-    // ================= ROTATION =================
-
-    private float GetDirAngle(Vector2Int dir)
-    {
-        if (dir == Vector2Int.up) return 0f;
-        if (dir == Vector2Int.right) return 90f;
-        if (dir == Vector2Int.down) return 180f;
-        if (dir == Vector2Int.left) return 270f;
-
-        return 0f;
-    }
-
-    /*
-    // Asume que el sprite base de la esquina es: UP -> RIGHT
-    private float GetCornerRotation(Vector2Int from, Vector2Int to)
-    {
-        if (from == Vector2Int.up && to == Vector2Int.right) return 0f;
-        if (from == Vector2Int.right && to == Vector2Int.down) return 90f;
-        if (from == Vector2Int.down && to == Vector2Int.left) return 180f;
-        if (from == Vector2Int.left && to == Vector2Int.up) return 270f;
-
-        // Curvas inversas
-        if (from == Vector2Int.right && to == Vector2Int.up) return 270f;
-        if (from == Vector2Int.down && to == Vector2Int.right) return 180f;
-        if (from == Vector2Int.left && to == Vector2Int.down) return 90f;
-        if (from == Vector2Int.up && to == Vector2Int.left) return 0f;
-
-        return 0f;
-    }
-    */
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3895744879233443299}
   - component: {fileID: 3990284281364528249}
   m_Layer: 0
-  m_Name: ArrowHead_TMP
+  m_Name: Prefab_ArrowHead
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: ff6d1285e3db7b349be62b003794c67f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0188115afb610584097307a89168d446, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

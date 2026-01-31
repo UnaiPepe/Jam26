@@ -1,177 +1,105 @@
+using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [Header("References")]
-    public Test_Movement playerMover;
-    public float cellSize = 1f;
+        private Unit unit;
+        private bool plannedThisPlanning = false;
 
-    [Header("Enemy grid")]
-    public int gridWidth = 15;
-    public int gridHeight = 15;
-    public float stepDuration = 0.12f;
-    [Range(1, 3)] public int stepsPerPlayerMove = 1;
-
-    [Header("Collision")]
-    public float ignoreCollisionAtStartSeconds = 0.15f; // NEW
-
-    Animator anim;
-    Vector2Int gridPos;
-    bool isMoving;
-
-    bool hasHitPlayer = false;           
-    bool collisionEnabled = false;      
-
-    void Awake()
-    {
-        anim = GetComponent<Animator>();
-    }
-
-    void Start()
-    {
-        gridPos = WorldToGrid(transform.position);
-        gridPos = ClampToBounds(gridPos);
-        transform.position = GridToWorld(gridPos);
-
-        
-        anim.ResetTrigger("Hit");
-        anim.SetBool("IsMoving", false);
-
-       
-        StartCoroutine(EnableCollisionAfterDelay());
-
-        // suscribirse al movimiento del player
-        playerMover.OnMoveStarted += HandlePlayerMoveStarted;
-        playerMover.OnMoveFinished += HandlePlayerMoveFinished;
-        anim.ResetTrigger("Hit");
-        anim.SetBool("IsMoving", false);
-        anim.Play("Quieto", 0, 0f);  // el nombre EXACTO del estado
-        anim.Update(0f);
-    }
-
-    IEnumerator EnableCollisionAfterDelay() // NEW
-    {
-        yield return new WaitForSeconds(ignoreCollisionAtStartSeconds);
-        collisionEnabled = true;
-    }
-
-    void OnDestroy()
-    {
-        if (playerMover != null)
+        void Awake()
         {
-            playerMover.OnMoveStarted -= HandlePlayerMoveStarted;
-            playerMover.OnMoveFinished -= HandlePlayerMoveFinished;
-        }
-    }
-
-    void HandlePlayerMoveStarted()
-    {
-        if (hasHitPlayer) return;     
-        if (anim == null) return;
-
-        anim.SetBool("IsMoving", true);
-
-        if (!isMoving)
-            StartCoroutine(MoveWhilePlayerMoves());
-    }
-
-    void HandlePlayerMoveFinished()
-    {
-        if (anim == null) return;
-
-        anim.SetBool("IsMoving", false);
-    }
-
-    IEnumerator MoveWhilePlayerMoves()
-    {
-        isMoving = true;
-
-        int steps = Mathf.Clamp(stepsPerPlayerMove, 1, 3);
-        Vector2Int dir = RandomCardinalDir();
-
-        for (int i = 0; i < steps; i++)
-        {
-            if (hasHitPlayer) break; 
-
-            Vector2Int next = gridPos + dir;
-            if (!IsInsideBounds(next)) break;
-
-            yield return StepTo(next);
-            gridPos = next;
+            unit = GetComponent<Unit>();
         }
 
-        isMoving = false;
-    }
-
-    IEnumerator StepTo(Vector2Int targetGrid)
-    {
-        Vector3 start = transform.position;
-        Vector3 target = GridToWorld(targetGrid);
-
-        float t = 0f;
-        while (t < 1f)
+        void Update()
         {
-            if (hasHitPlayer) yield break; 
-            t += Time.deltaTime / stepDuration;
-            transform.position = Vector3.Lerp(start, target, t);
-            yield return null;
+            if (TurnManager.Instance == null) return;
+
+            // Solo planifica durante Planning, una vez
+            if (TurnManager.Instance.CurrentState == TurnState.Planning)
+            {
+                if (!plannedThisPlanning)
+                {
+                    PlanAndTelegraph();
+                    plannedThisPlanning = true;
+                }
+            }
+            else
+            {
+                // al salir de planning, resetea para el siguiente turno
+                plannedThisPlanning = false;
+            }
         }
 
-        transform.position = target;
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if (!collisionEnabled) return;       
-        if (hasHitPlayer) return;            
-
-        if (collision.gameObject.CompareTag("Player"))
+        void PlanAndTelegraph()
         {
-            hasHitPlayer = true;            
-            Debug.Log("Han chocado");
+            // Encuentra el jugador más cercano (Unit sin EnemyAI)
+            Unit target = FindNearestPlayerUnit();
+            if (target == null)
+            {
+                unit.ClearPlannedMovement();
+                MovementPreview.Instance?.AI_HideGhostAndArrow(unit);
+                return;
+            }
 
-            
-            StopAllCoroutines();
-            isMoving = false;
+            // Path hacia el jugador
+            List<Vector2Int> path = Pathfinder.FindPath(unit.GridPosition, target.GridPosition);
+            if (path == null || path.Count == 0)
+            {
+                unit.ClearPlannedMovement();
+                MovementPreview.Instance?.AI_HideGhostAndArrow(unit);
+                return;
+            }
 
-            
-            anim.ResetTrigger("Hit");
-            anim.SetTrigger("Hit");
-            anim.SetBool("IsMoving", false);
+            // Elige destino avanzando por el path hasta movementRange
+            int maxSteps = Mathf.Max(0, unit.movementRange);
+            int index = Mathf.Min(maxSteps, path.Count - 1);
+
+            Vector2Int destination = path[index];
+
+            // Si por lo que sea no se mueve
+            if (destination == unit.GridPosition)
+            {
+                unit.ClearPlannedMovement();
+                MovementPreview.Instance?.AI_HideGhostAndArrow(unit);
+                return;
+            }
+
+            // Planifica
+            unit.SetPlannedDestination(destination);
+
+            // Muestra ghost + flecha (lo que hará)
+            MovementPreview.Instance?.AI_ShowGhostAndArrow(unit, destination);
+
+            Debug.Log("[EnemyAI] {name} planea moverse a {destination} (objetivo: {target.name})");
         }
-    }
 
-    // --- Grid helpers ---
-    Vector2Int RandomCardinalDir()
-    {
-        int r = Random.Range(0, 4);
-        return r switch
+        Unit FindNearestPlayerUnit()
         {
-            0 => new Vector2Int(1, 0),
-            1 => new Vector2Int(-1, 0),
-            2 => new Vector2Int(0, 1),
-            _ => new Vector2Int(0, -1),
-        };
-    }
+            Unit[] all = FindObjectsOfType<Unit>();
 
-    bool IsInsideBounds(Vector2Int gp)
-        => gp.x >= 0 && gp.x < gridWidth && gp.y >= 0 && gp.y < gridHeight;
+            Unit best = null;
+            int bestDist = int.MaxValue;
 
-    Vector2Int ClampToBounds(Vector2Int gp)
-    {
-        gp.x = Mathf.Clamp(gp.x, 0, gridWidth - 1);
-        gp.y = Mathf.Clamp(gp.y, 0, gridHeight - 1);
-        return gp;
-    }
+            foreach (Unit u in all)
+            {
+                if (u == unit) continue;
 
-    Vector3 GridToWorld(Vector2Int gp)
-        => new Vector3(gp.x * cellSize, transform.position.y, gp.y * cellSize);
+                // Jugador = Unit que NO tenga EnemyAI
+                if (u.GetComponent<Enemy>() != null) continue;
 
-    Vector2Int WorldToGrid(Vector3 world)
-    {
-        int x = Mathf.RoundToInt(world.x / cellSize);
-        int z = Mathf.RoundToInt(world.z / cellSize);
-        return new Vector2Int(x, z);
-    }
+                int dist = Mathf.Abs(u.GridPosition.x - unit.GridPosition.x) +
+                           Mathf.Abs(u.GridPosition.y - unit.GridPosition.y);
+
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    best = u;
+                }
+            }
+
+            return best;
+        }
+    
 }

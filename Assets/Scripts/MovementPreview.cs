@@ -56,6 +56,11 @@ public class MovementPreview : MonoBehaviour
 
         if (selectedUnit != null)
         {
+            // Si el click ha sido sobre un enemigo, no hacer nada
+            Unit clickedUnit = hit.collider.GetComponent<Unit>();
+            if (clickedUnit != null && clickedUnit.GetComponent<Enemy>() != null)
+                return;
+
             Vector2Int gridPos =
                 GridManager.Instance.WorldToGrid(hit.point);
 
@@ -70,8 +75,10 @@ public class MovementPreview : MonoBehaviour
         }
 
         Unit unit = hit.collider.GetComponent<Unit>();
-        if (unit != null)
+        if (unit != null && unit.GetComponent<Enemy>() == null) 
+        {
             SelectUnit(unit);
+        }
     }
 
     // ================= SELECTION =================
@@ -206,6 +213,41 @@ public class MovementPreview : MonoBehaviour
             arrow = arrow,
             hasDestination = false
         };
+    }
+
+    public void AI_ShowGhostAndArrow(Unit unit, Vector2Int gridPos)
+    {
+        if (unit == null) return;
+
+        if (!unitGhosts.ContainsKey(unit))
+            CreateGhostData(unit);
+
+        GhostData data = unitGhosts[unit];
+
+        unit.SetPlannedDestination(gridPos);
+        data.hasDestination = true;
+        data.destination = gridPos;
+
+        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
+        pos.y = data.ghost.transform.position.y;
+        data.ghost.transform.position = pos;
+        data.ghost.SetActive(true);
+
+        List<Vector2Int> path = Pathfinder.FindPath(unit.GridPosition, gridPos);
+        if (path.Count >= 2) path.RemoveAt(path.Count - 1);
+
+        data.arrow.RenderPath(unit.GridPosition, path);
+    }
+
+    public void AI_HideGhostAndArrow(Unit unit)
+    {
+        if (unit == null) return;
+        if (!unitGhosts.ContainsKey(unit)) return;
+
+        GhostData data = unitGhosts[unit];
+        data.hasDestination = false;
+        data.ghost.SetActive(false);
+        data.arrow.Clear();
     }
 }
 

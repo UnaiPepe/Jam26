@@ -45,6 +45,40 @@ public class MovementExecution : MonoBehaviour
         }
 
         StartCoroutine(ExecuteMovement());
+
+
+    }
+
+    public void BeginEnemiesOnly()
+    {
+        units.Clear();
+
+        foreach (Unit u in FindObjectsOfType<Unit>())
+        {
+            // SOLO enemigos (los que tienen el script Enemy)
+            if (u.GetComponent<Enemy>() == null)
+                continue;
+
+            // Solo si la IA había planeado movimiento
+            if (!u.HasPlannedMovement)
+                continue;
+
+            List<Vector2Int> path =
+                Pathfinder.FindPath(u.GridPosition, u.PlannedDestination);
+
+            if (path == null || path.Count == 0)
+                continue;
+
+            units.Add(new UnitMoveData
+            {
+                unit = u,
+                path = new Queue<Vector2Int>(path),
+                finished = false
+            });
+        }
+
+        // Ejecuta el movimiento enemigo
+        StartCoroutine(ExecuteMovement());
     }
 
     private IEnumerator ExecuteMovement()
@@ -90,7 +124,9 @@ public class MovementExecution : MonoBehaviour
 
         foreach (Unit u in FindObjectsOfType<Unit>())
         {
+
             u.ResetPushState();
+            u.ClearPlannedMovement();
         }
     }
 }

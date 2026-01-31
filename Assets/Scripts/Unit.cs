@@ -1,11 +1,18 @@
 using System.Collections;
 using UnityEngine;
 
+
 public class Unit : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
     public int movementRange = 5;
+
+    [Header("Push")]
+    public int pushBonus = 0;
+
+    [Header("Team")]
+    public Team team = Team.Jugador1;
 
     // Grid position
     public Vector2Int GridPosition { get; private set; }
@@ -17,6 +24,14 @@ public class Unit : MonoBehaviour
     private bool isMoving;
     private bool wasPushedThisTurn;
     private bool stunnedThisTurn;
+
+    public enum Team
+    {
+        Jugador1,
+        Jugador2,
+        NPC
+    }
+
 
     private void Start()
     {
@@ -108,11 +123,15 @@ public class Unit : MonoBehaviour
             return;
         }
 
-        // Normal case: random loser
-        bool thisLoses = Random.value < 0.5f;
+        // ---- PROBABILIDAD CON BONUS ----
+        int chanceThisWins = 50 + (this.pushBonus - other.pushBonus);
+        chanceThisWins = Mathf.Clamp(chanceThisWins, 0, 100);
 
-        Unit loser = thisLoses ? this : other;
-        Unit winner = thisLoses ? other : this;
+        int roll = Random.Range(0, 100);
+        bool thisWins = roll < chanceThisWins;
+
+        Unit winner = thisWins ? this : other;
+        Unit loser = thisWins ? other : this;
 
         ResolvePush(loser, winner, collisionPos, onFinished);
     }
@@ -133,9 +152,21 @@ public class Unit : MonoBehaviour
 
         Vector2Int pushTarget = loser.GridPosition + pushDir;
 
-        // If push is not possible, no one moves
-        if (!GridManager.Instance.IsInsideGrid(pushTarget) ||
-            GetUnitAt(pushTarget) != null)
+        // Si el empujón saca al perdedor fuera del grid - eliminado
+        if (!GridManager.Instance.IsInsideGrid(pushTarget))
+        {
+            Debug.Log(
+                "'" + winner.name + "' ha tirado del ring a '" + loser.name + "'"
+            );
+
+            loser.gameObject.SetActive(false);
+
+            onFinished?.Invoke();
+            return;
+        }
+
+        // Si la casilla está ocupada, no se puede empujar
+        if (GetUnitAt(pushTarget) != null)
         {
             onFinished?.Invoke();
             return;

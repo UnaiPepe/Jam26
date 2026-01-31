@@ -6375,16 +6375,6 @@ ScriptedImporter:
   resliceFromLayer: 0
   pSDLayerImportSetting: []
   psdLayers:
-  - name: cabeza
-    spriteName: cabeza
-    isGroup: 0
-    parentIndex: -1
-    spriteID: 7e2c37e30d00e25429ebdae2e7d18e5c
-    layerID: 16
-    mosaicPosition: {x: 4, y: 4}
-    flatten: 0
-    isImported: 1
-    isVisible: 1
   - name: pieDcha
     spriteName: pieDcha
     isGroup: 0
@@ -6442,6 +6432,16 @@ ScriptedImporter:
     spriteID: b86a1e18913864640a02357714f86ba5
     layerID: 11
     mosaicPosition: {x: 4, y: 845}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: cabeza
+    spriteName: cabeza
+    isGroup: 0
+    parentIndex: -1
+    spriteID: 7e2c37e30d00e25429ebdae2e7d18e5c
+    layerID: 16
+    mosaicPosition: {x: 4, y: 4}
     flatten: 0
     isImported: 1
     isVisible: 1

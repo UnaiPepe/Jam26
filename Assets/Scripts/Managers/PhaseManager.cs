@@ -45,6 +45,9 @@ namespace Assets.Scripts.Managers
         [Tooltip("Delay between clicking start (camera move) and the first Move Phase announcement.")]
         public float startGameDelay = 0.5f;
 
+        [Tooltip("GameObject to activate when the game starts (e.g. gameplay HUD, decorations).")]
+        public GameObject objectToActivateOnStart;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -66,6 +69,12 @@ namespace Assets.Scripts.Managers
         {
             Debug.Log("Starting Game Sequence...");
             
+            // 0. Activate Extra Object
+            if (objectToActivateOnStart != null)
+            {
+                objectToActivateOnStart.SetActive(true);
+            }
+
             // 1. Move Camera to next view (Menu -> Ring)
             if (Assets.Scripts.Camera.CameraManager.Instance != null)
             {

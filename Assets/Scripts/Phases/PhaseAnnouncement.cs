@@ -39,6 +39,12 @@ namespace Assets.Scripts.Phases
         [Tooltip("Invoked when the text slams into the center. Good for SFX.")]
         public UnityEvent OnPhaseImpact;
 
+        [Header("Audio")]
+        [Tooltip("Sound clip to play when this announcement appears.")]
+        public AudioClip announcementClip;
+        
+        private AudioSource _audioSource;
+
         private TMP_Text _textComponent;
         private RectTransform _rectTransform;
         private Vector3 _originalPosition;
@@ -51,7 +57,16 @@ namespace Assets.Scripts.Phases
             _rectTransform = GetComponent<RectTransform>();
             _originalPosition = _rectTransform.localPosition; 
             _mainCamera = UnityEngine.Camera.main;
+            
+            // Try get AudioSource on this object, or Add one if needed (though usually user adds it)
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null) 
+            {
+                _audioSource = gameObject.AddComponent<AudioSource>();
+                _audioSource.playOnAwake = false;
+            }
         }
+        
         private void OnEnable()
         {
             RectTransform parentRect = transform.parent as RectTransform;
@@ -59,6 +74,12 @@ namespace Assets.Scripts.Phases
                 _canvasWidth = parentRect.rect.width;
             else
                 _canvasWidth = Screen.width; 
+
+            // Play Audio
+            if (_audioSource != null && announcementClip != null)
+            {
+                _audioSource.PlayOneShot(announcementClip);
+            }
 
             StartCoroutine(AnimatePhaseImpact());
         }

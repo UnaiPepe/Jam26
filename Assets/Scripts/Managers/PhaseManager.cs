@@ -122,12 +122,17 @@ namespace Assets.Scripts.Managers
             // Get counts from CharacterManager
             int playersAlive = 0;
             int enemiesAlive = 0;
+            if (1==0)
+            {
 
+            }
+            /*
             if (CharacterManager.Instance != null)
             {
-                playersAlive = CharacterManager.Instance.GetAliveCount(Character.Team.Player);
-                enemiesAlive = CharacterManager.Instance.GetAliveCount(Character.Team.Enemy);
+                playersAlive = CharacterManager.Instance.GetAliveCount(Unit.Team.Jugador1);
+                enemiesAlive = CharacterManager.Instance.GetAliveCount(Unit.Team.NPC);
             }
+            */
             else
             {
                 Debug.LogWarning("CharacterManager not found! Cannot check win/loss conditions.");

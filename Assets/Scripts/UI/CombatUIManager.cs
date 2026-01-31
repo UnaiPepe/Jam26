@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Assets.Scripts.Character;
+//using Assets.Scripts.Character;
 using Assets.Scripts.Managers;
 using UnityEngine.EventSystems;
 
@@ -27,7 +27,7 @@ namespace Assets.Scripts.UI
         public GameObject attackButtonPrefab; // Prefab with Button & Text
         public Transform attackButtonParent;  // Layout group for sub-buttons
 
-        private CharacterAttributes _selectedCharacter;
+        //private CharacterAttributes _selectedCharacter;
         private List<GameObject> _spawnedButtons = new List<GameObject>();
 
         private void Awake()
@@ -64,7 +64,7 @@ namespace Assets.Scripts.UI
             // entryExit.callback.AddListener((data) => { HideSubMenu(); });
             // trigger.triggers.Add(entryExit);
         }
-
+        /*
         public void ShowUIFor(CharacterAttributes character)
         {
             _selectedCharacter = character;
@@ -75,18 +75,19 @@ namespace Assets.Scripts.UI
 
             Debug.Log($"Combat UI Opened for {character.name}");
         }
-
+        */
         public void HideUI()
         {
             if (mainContainer) mainContainer.SetActive(false);
             if (subMenuContainer) subMenuContainer.SetActive(false);
-            _selectedCharacter = null;
+            //_selectedCharacter = null;
         }
 
         public void ShowSubMenu(string category)
         {
+            /*
             if (_selectedCharacter == null || subMenuContainer == null) return;
-
+            */
             subMenuContainer.SetActive(true);
             
             // Clear old buttons
@@ -94,18 +95,21 @@ namespace Assets.Scripts.UI
             _spawnedButtons.Clear();
 
             // Get Attacks
-            Attack[] attacks = null;
+            //Attack[] attacks = null;
             switch (category)
             {
+                /*
                 case "Move": attacks = _selectedCharacter.moveAttacks; break;
                 case "Act": attacks = _selectedCharacter.actAttacks; break;
                 case "Start": attacks = _selectedCharacter.startAttacks; break;
                 case "Kill": attacks = _selectedCharacter.killAttacks; break;
+                */
             }
 
-            if (attacks == null) return;
+            //if (attacks == null) return;
 
             // Create Buttons
+            /*
             foreach (var atk in attacks)
             {
                 if (string.IsNullOrEmpty(atk.attackName)) continue;
@@ -122,12 +126,14 @@ namespace Assets.Scripts.UI
                     btn.onClick.AddListener(() => OnAttackClicked(atk));
                 }
             }
+            */
         }
-
+        /*
         private void OnAttackClicked(Attack attack)
         {
             Debug.Log($"Selected Attack: {attack.attackName}");
             // Here we would trigger the attack logic
         }
+        */
     }
 }

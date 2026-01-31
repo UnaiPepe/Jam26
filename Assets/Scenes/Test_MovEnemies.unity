@@ -1435,6 +1435,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4391890149641188773, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: team
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1762,8 +1766,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d758f3457a7041b419d79fdadacd9063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movimientoButton: {fileID: 1888169390}
-  startButton: {fileID: 326865456}
 --- !u!1001 &2528362104216029483
 PrefabInstance:
   m_ObjectHideFlags: 0

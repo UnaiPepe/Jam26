@@ -17,8 +17,8 @@ public class MovementPreview : MonoBehaviour
 
     private Unit selectedUnit;
 
-    private Dictionary<Unit, GhostData> unitGhosts = new();
-    private List<GameObject> tiles = new();
+    private Dictionary<Unit, GhostData> unitGhosts = new Dictionary<Unit, GhostData>();
+    private List<GameObject> tiles = new List<GameObject>();
 
     private void Awake()
     {
@@ -27,12 +27,21 @@ public class MovementPreview : MonoBehaviour
 
     private void Update()
     {
+        if (TurnManager.Instance == null)
+            return;
+
+        // Bloquea input durante ejecución
         if (TurnManager.Instance.IsExecutingMovement())
         {
             HideAllPreviews();
             return;
         }
 
+        // El NPC no usa input humano
+        if (TurnManager.Instance.CurrentTeamTurn == TeamTurn.NPC)
+            return;
+
+        // Bloqueo UI
         if (EventSystem.current != null &&
             EventSystem.current.IsPointerOverGameObject())
             return;
@@ -56,12 +65,9 @@ public class MovementPreview : MonoBehaviour
             return;
         }
 
+        // Si ya hay unidad seleccionada, elegir destino
         if (selectedUnit != null)
         {
-            Unit clickedUnit = hit.collider.GetComponent<Unit>();
-            if (clickedUnit != null && clickedUnit.GetComponent<Enemy>() != null)
-                return;
-
             Vector2Int gridPos =
                 GridManager.Instance.WorldToGrid(hit.point);
 
@@ -75,11 +81,16 @@ public class MovementPreview : MonoBehaviour
             return;
         }
 
+        // Selección de unidad
         Unit unit = hit.collider.GetComponent<Unit>();
-        if (unit != null && unit.GetComponent<Enemy>() == null)
-        {
-            SelectUnit(unit);
-        }
+        if (unit == null)
+            return;
+
+        // Solo unidades del equipo activo
+        if (!IsUnitSelectableThisTurn(unit))
+            return;
+
+        SelectUnit(unit);
     }
 
     // ================= SELECTION =================
@@ -88,7 +99,6 @@ public class MovementPreview : MonoBehaviour
     {
         ClearTiles();
         selectedUnit = unit;
-        FindObjectOfType<TurnFlowUI>()?.SetSelectedPlayer(unit);
 
         if (!unitGhosts.ContainsKey(unit))
             CreateGhostData(unit);
@@ -109,8 +119,6 @@ public class MovementPreview : MonoBehaviour
         GhostData data = unitGhosts[selectedUnit];
 
         selectedUnit.SetPlannedDestination(gridPos);
-        FindObjectOfType<TurnFlowUI>()?.SetSelectedPlayer(selectedUnit);
-        Debug.Log($"[MovementPreview] Planned: {selectedUnit.name} -> {gridPos}  HasPlannedMovement={selectedUnit.HasPlannedMovement}");
 
         data.hasDestination = true;
         data.destination = gridPos;
@@ -184,6 +192,19 @@ public class MovementPreview : MonoBehaviour
 
     // ================= HELPERS =================
 
+    private bool IsUnitSelectableThisTurn(Unit unit)
+    {
+        TeamTurn current = TurnManager.Instance.CurrentTeamTurn;
+
+        if (current == TeamTurn.Jugador1 && unit.team == Unit.Team.Jugador1)
+            return true;
+
+        if (current == TeamTurn.Jugador2 && unit.team == Unit.Team.Jugador2)
+            return true;
+
+        return false;
+    }
+
     private bool IsInsideMovementRange(Unit unit, Vector2Int gridPos)
     {
         Vector2Int origin = unit.GridPosition;
@@ -199,10 +220,10 @@ public class MovementPreview : MonoBehaviour
         GameObject ghost = Instantiate(ghostPrefab);
         ghost.SetActive(false);
 
-        GameObject arrowGO = new GameObject($"Arrow_{unit.name}");
+        GameObject arrowGO = new GameObject("Arrow_" + unit.name);
         arrowGO.transform.SetParent(transform);
 
-        var arrow = arrowGO.AddComponent<PathArrowRenderer>();
+        PathArrowRenderer arrow = arrowGO.AddComponent<PathArrowRenderer>();
         arrow.arrowBodyPrefab = arrowBodyPrefab;
         arrow.arrowCornerPrefab = arrowCornerPrefab;
         arrow.arrowHeadPrefab = arrowHeadPrefab;
@@ -215,9 +236,12 @@ public class MovementPreview : MonoBehaviour
         };
     }
 
+    // ================= AI SUPPORT =================
+
     public void AI_ShowGhostAndArrow(Unit unit, Vector2Int gridPos)
     {
-        if (unit == null) return;
+        if (unit == null)
+            return;
 
         if (!unitGhosts.ContainsKey(unit))
             CreateGhostData(unit);
@@ -233,16 +257,22 @@ public class MovementPreview : MonoBehaviour
         data.ghost.transform.position = pos;
         data.ghost.SetActive(true);
 
-        List<Vector2Int> path = Pathfinder.FindPath(unit.GridPosition, gridPos);
-        if (path.Count >= 2) path.RemoveAt(path.Count - 1);
+        List<Vector2Int> path =
+            Pathfinder.FindPath(unit.GridPosition, gridPos);
+
+        if (path.Count >= 2)
+            path.RemoveAt(path.Count - 1);
 
         data.arrow.RenderPath(unit.GridPosition, path);
     }
 
     public void AI_HideGhostAndArrow(Unit unit)
     {
-        if (unit == null) return;
-        if (!unitGhosts.ContainsKey(unit)) return;
+        if (unit == null)
+            return;
+
+        if (!unitGhosts.ContainsKey(unit))
+            return;
 
         GhostData data = unitGhosts[unit];
         data.hasDestination = false;

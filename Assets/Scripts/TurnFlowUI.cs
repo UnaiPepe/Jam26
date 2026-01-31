@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class TurnFlowUI : MonoBehaviour
 {
+    /*
     [Header("UI")]
     public GameObject movimientoButton;
     public GameObject startButton;
@@ -132,4 +133,16 @@ public class TurnFlowUI : MonoBehaviour
             }
         }
     }
+
+    void SetStateExecution()
+    {
+        
+    }
+    void SetStatePlanning()
+    {
+
+    }
+
+    */
+
 }

@@ -1,9 +1,18 @@
+//using Assets.Scripts.Character;
 using System.Collections;
 using UnityEngine;
 
 
+
 public class Unit : MonoBehaviour
 {
+    public enum Team
+    {
+        Jugador1,
+        Jugador2,
+        NPC
+    }
+
     [Header("Movement")]
     public float moveSpeed = 5f;
     public int movementRange = 5;
@@ -24,14 +33,6 @@ public class Unit : MonoBehaviour
     private bool isMoving;
     private bool wasPushedThisTurn;
     private bool stunnedThisTurn;
-
-    public enum Team
-    {
-        Jugador1,
-        Jugador2,
-        NPC
-    }
-
 
     private void Start()
     {
@@ -152,7 +153,7 @@ public class Unit : MonoBehaviour
 
         Vector2Int pushTarget = loser.GridPosition + pushDir;
 
-        // Si el empujón saca al perdedor fuera del grid - eliminado
+        // Ring out -> eliminado
         if (!GridManager.Instance.IsInsideGrid(pushTarget))
         {
             Debug.Log(
@@ -160,12 +161,11 @@ public class Unit : MonoBehaviour
             );
 
             loser.gameObject.SetActive(false);
-
             onFinished?.Invoke();
             return;
         }
 
-        // Si la casilla está ocupada, no se puede empujar
+        // Casilla ocupada -> no se puede empujar
         if (GetUnitAt(pushTarget) != null)
         {
             onFinished?.Invoke();

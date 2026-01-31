@@ -8,19 +8,4 @@ public class MoveTile : MonoBehaviour
     {
         GridPosition = gridPos;
     }
-
-    private void OnMouseEnter()
-    {
-        MovementPreview.Instance.ShowGhost(GridPosition);
-    }
-
-    private void OnMouseExit()
-    {
-        MovementPreview.Instance.HideGhost();
-    }
-
-    private void OnMouseDown()
-    {
-        MovementPreview.Instance.SelectDestination(GridPosition);
-    }
 }

@@ -40,8 +40,15 @@ namespace Assets.Scripts.Phases
         public UnityEvent OnPhaseImpact;
 
         [Header("Audio")]
-        [Tooltip("Sound clip to play when this announcement appears.")]
+        [Tooltip("Primary Sound clip to play when this announcement appears.")]
         public AudioClip announcementClip;
+        [Range(0f, 1f)]
+        public float volume1 = 1.0f;
+
+        [Tooltip("Secondary Sound clip to play simultaneously.")]
+        public AudioClip announcementClip2;
+        [Range(0f, 1f)]
+        public float volume2 = 1.0f;
         
         private AudioSource _audioSource;
 
@@ -76,9 +83,10 @@ namespace Assets.Scripts.Phases
                 _canvasWidth = Screen.width; 
 
             // Play Audio
-            if (_audioSource != null && announcementClip != null)
+            if (_audioSource != null)
             {
-                _audioSource.PlayOneShot(announcementClip);
+                if (announcementClip != null) _audioSource.PlayOneShot(announcementClip, volume1);
+                if (announcementClip2 != null) _audioSource.PlayOneShot(announcementClip2, volume2);
             }
 
             StartCoroutine(AnimatePhaseImpact());

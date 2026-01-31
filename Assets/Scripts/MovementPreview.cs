@@ -10,6 +10,7 @@ public class MovementPreview : MonoBehaviour
     public GameObject tilePrefab;
     public GameObject ghostPrefab;
     public GameObject arrowHeadPrefab;
+    public GameObject cornerPrefab;
     public Material arrowBodyMaterial;
 
     private Unit selectedUnit;
@@ -189,6 +190,7 @@ public class MovementPreview : MonoBehaviour
 
         var arrow = arrowGO.AddComponent<PathArrowRenderer>();
         arrow.arrowHeadPrefab = arrowHeadPrefab;
+        arrow.cornerPrefab = cornerPrefab;
 
         arrowGO.GetComponent<MeshRenderer>().material = arrowBodyMaterial;
 

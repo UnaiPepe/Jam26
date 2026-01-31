@@ -8,11 +8,13 @@ public class PathArrowRenderer : MonoBehaviour
     public float width = 0.3f;
     public float height = 0.05f;
 
-    [Header("Arrow Head")]
+    [Header("Prefabs")]
     public GameObject arrowHeadPrefab;
+    public GameObject cornerPrefab;
 
     private Mesh mesh;
     private GameObject arrowHeadInstance;
+    private List<GameObject> corners = new();
 
     private void Awake()
     {
@@ -25,13 +27,12 @@ public class PathArrowRenderer : MonoBehaviour
 
     public void RenderPath(List<Vector2Int> path)
     {
-        if (path == null || path.Count < 2)
-        {
-            Clear();
-            return;
-        }
+        Clear();
 
-        BuildRibbonMesh(path);
+        if (path == null || path.Count < 2)
+            return;
+
+        BuildBodyWithCorners(path);
         PlaceArrowHead(path);
     }
 
@@ -41,79 +42,110 @@ public class PathArrowRenderer : MonoBehaviour
 
         if (arrowHeadInstance != null)
             arrowHeadInstance.SetActive(false);
+
+        foreach (var c in corners)
+            Destroy(c);
+        corners.Clear();
     }
 
-    // ================= MESH =================
+    // ================= BODY + CORNERS =================
 
-    private void BuildRibbonMesh(List<Vector2Int> path)
+    private void BuildBodyWithCorners(List<Vector2Int> path)
     {
-        mesh.Clear();
-
         List<Vector3> vertices = new();
         List<int> triangles = new();
         List<Vector2> uvs = new();
 
-        Vector3 prev = GridManager.Instance.GridToWorld(path[0]);
+        int vertIndex = 0;
 
-        for (int i = 1; i < path.Count; i++)
+        for (int i = 0; i < path.Count - 1; i++)
         {
-            Vector3 curr = GridManager.Instance.GridToWorld(path[i]);
+            Vector2Int from = path[i];
+            Vector2Int to = path[i + 1];
 
-            Vector3 dir = (curr - prev).normalized;
+            Vector3 a = GridManager.Instance.GridToWorld(from);
+            Vector3 b = GridManager.Instance.GridToWorld(to);
+
+            Vector3 dir = (b - a).normalized;
             Vector3 right = Vector3.Cross(Vector3.up, dir) * (width * 0.5f);
 
-            Vector3 leftVert = prev - right + Vector3.up * height;
-            Vector3 rightVert = prev + right + Vector3.up * height;
+            Vector3 v0 = a - right + Vector3.up * height;
+            Vector3 v1 = a + right + Vector3.up * height;
+            Vector3 v2 = b - right + Vector3.up * height;
+            Vector3 v3 = b + right + Vector3.up * height;
 
-            vertices.Add(leftVert);
-            vertices.Add(rightVert);
+            vertices.Add(v0);
+            vertices.Add(v1);
+            vertices.Add(v2);
+            vertices.Add(v3);
 
-            float v = i / (float)(path.Count - 1);
-            uvs.Add(new Vector2(0, v));
-            uvs.Add(new Vector2(1, v));
+            triangles.Add(vertIndex + 0);
+            triangles.Add(vertIndex + 2);
+            triangles.Add(vertIndex + 1);
 
-            if (i > 1)
+            triangles.Add(vertIndex + 1);
+            triangles.Add(vertIndex + 2);
+            triangles.Add(vertIndex + 3);
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(1, 0));
+            uvs.Add(new Vector2(0, 1));
+            uvs.Add(new Vector2(1, 1));
+
+            vertIndex += 4;
+
+            // ===== CORNER DETECTION =====
+            if (i < path.Count - 2)
             {
-                int baseIndex = vertices.Count - 4;
+                Vector2Int nextDir = path[i + 2] - to;
+                Vector2Int currDir = to - from;
 
-                triangles.Add(baseIndex + 0);
-                triangles.Add(baseIndex + 2);
-                triangles.Add(baseIndex + 1);
-
-                triangles.Add(baseIndex + 1);
-                triangles.Add(baseIndex + 2);
-                triangles.Add(baseIndex + 3);
+                if (currDir != nextDir)
+                {
+                    PlaceCorner(to, currDir, nextDir);
+                }
             }
-
-            prev = curr;
         }
-
-        // último punto
-        Vector3 lastDir = (GridManager.Instance.GridToWorld(path[^1]) -
-                           GridManager.Instance.GridToWorld(path[^2])).normalized;
-        Vector3 lastRight = Vector3.Cross(Vector3.up, lastDir) * (width * 0.5f);
-
-        Vector3 end = GridManager.Instance.GridToWorld(path[^1]);
-        vertices.Add(end - lastRight + Vector3.up * height);
-        vertices.Add(end + lastRight + Vector3.up * height);
-
-        uvs.Add(new Vector2(0, 1));
-        uvs.Add(new Vector2(1, 1));
-
-        int lastBase = vertices.Count - 4;
-        triangles.Add(lastBase + 0);
-        triangles.Add(lastBase + 2);
-        triangles.Add(lastBase + 1);
-
-        triangles.Add(lastBase + 1);
-        triangles.Add(lastBase + 2);
-        triangles.Add(lastBase + 3);
 
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
         mesh.SetUVs(0, uvs);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
+    }
+
+    // ================= CORNER =================
+
+    private void PlaceCorner(
+        Vector2Int gridPos,
+        Vector2Int fromDir,
+        Vector2Int toDir)
+    {
+        GameObject corner = Instantiate(cornerPrefab, transform);
+        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
+        pos.y += height;
+        corner.transform.position = pos;
+
+        float rot = GetCornerRotation(fromDir, toDir);
+        corner.transform.rotation = Quaternion.Euler(90f, rot, 0f);
+
+        corners.Add(corner);
+    }
+
+    private float GetCornerRotation(Vector2Int from, Vector2Int to)
+    {
+        // Base sprite: RIGHT -> DOWN
+        if (from == Vector2Int.right && to == Vector2Int.down) return 0;
+        if (from == Vector2Int.down && to == Vector2Int.left) return 90;
+        if (from == Vector2Int.left && to == Vector2Int.up) return 180;
+        if (from == Vector2Int.up && to == Vector2Int.right) return 270;
+
+        if (from == Vector2Int.down && to == Vector2Int.right) return 270;
+        if (from == Vector2Int.left && to == Vector2Int.down) return 180;
+        if (from == Vector2Int.up && to == Vector2Int.left) return 90;
+        if (from == Vector2Int.right && to == Vector2Int.up) return 0;
+
+        return 0;
     }
 
     // ================= ARROW HEAD =================
@@ -132,7 +164,6 @@ public class PathArrowRenderer : MonoBehaviour
             end + Vector3.up * height;
 
         float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-
         arrowHeadInstance.transform.rotation =
             Quaternion.Euler(90f, angle, 0f);
 

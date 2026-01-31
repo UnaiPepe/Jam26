@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,87 +6,244 @@ public class MovementPreview : MonoBehaviour
 {
     public static MovementPreview Instance;
 
+    [Header("Prefabs")]
     public GameObject tilePrefab;
     public GameObject ghostPrefab;
 
-    private Unit selectedUnit;
-    private GameObject ghost;
-    private List<GameObject> tiles = new();
+    [Header("Line Settings")]
+    public float lineHeight = 0.1f;
+    public float lineWidth = 0.15f;
 
-    private Vector2Int selectedDestination;
-    public Vector2Int GetSelectedDestination()
-    {
-        return selectedDestination;
-    }
+    // ===== ESTADO POR UNIDAD =====
+    private Dictionary<Unit, GhostData> unitGhosts = new();
+
+    private Unit selectedUnit;
+    private bool ignoreCancelThisFrame = false;
+
+    // ===== TILES ACTIVOS (solo del unit seleccionado) =====
+    private List<GameObject> tiles = new();
 
     private void Awake()
     {
         Instance = this;
-        ghost = Instantiate(ghostPrefab);
-        ghost.SetActive(false);
     }
 
     private void Update()
     {
-        if (selectedUnit == null) return;
+        if (selectedUnit == null)
+            return;
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (ignoreCancelThisFrame)
         {
-            Vector2Int gridPos = GridManager.Instance.WorldToGrid(hit.point);
+            ignoreCancelThisFrame = false;
+            return;
+        }
 
-            if (GridManager.Instance.IsInsideGrid(gridPos))
-            {
-                ghost.SetActive(true);
-                ghost.transform.position = GridManager.Instance.GridToWorld(gridPos);
-            }
+        // Click derecho → deseleccionar unidad (ghost y línea permanecen)
+        if (Input.GetMouseButtonDown(1))
+        {
+            DeselectUnit();
+            return;
+        }
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                selectedDestination = gridPos;
-            }
+        // Click izquierdo fuera de tile → deseleccionar
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!IsMouseOverTile())
+                DeselectUnit();
         }
     }
 
+    // ===== SELECCIONAR UNIDAD =====
     public void Show(Unit unit)
     {
-        Clear();
+        ClearTiles();
+
         selectedUnit = unit;
+        ignoreCancelThisFrame = true;
+
+        if (!unitGhosts.ContainsKey(unit))
+        {
+            CreateGhostDataForUnit(unit);
+        }
+
+        Vector2Int origin = unit.GridPosition;
 
         for (int x = -unit.movementRange; x <= unit.movementRange; x++)
         {
             for (int y = -unit.movementRange; y <= unit.movementRange; y++)
             {
-                Vector2Int pos = unit.GridPosition + new Vector2Int(x, y);
-                if (!GridManager.Instance.IsInsideGrid(pos)) continue;
-                if (Mathf.Abs(x) + Mathf.Abs(y) > unit.movementRange) continue;
+                if (Mathf.Abs(x) + Mathf.Abs(y) > unit.movementRange)
+                    continue;
 
-                GameObject tile = Instantiate(tilePrefab,
-                    GridManager.Instance.GridToWorld(pos),
-                    Quaternion.identity);
+                Vector2Int gridPos = origin + new Vector2Int(x, y);
+                if (!GridManager.Instance.IsInsideGrid(gridPos))
+                    continue;
 
-                tiles.Add(tile);
+                Vector3 worldPos = GridManager.Instance.GridToWorld(gridPos);
+                worldPos.y = 0f;
+
+                GameObject tileGO = Instantiate(
+                    tilePrefab,
+                    worldPos,
+                    Quaternion.Euler(90f, 0f, 0f)
+                );
+
+                tileGO.GetComponent<MoveTile>().Init(gridPos);
+                tiles.Add(tileGO);
             }
         }
     }
 
-    public void Clear()
+    // ===== GHOST PREVIEW =====
+    public void ShowGhost(Vector2Int gridPos)
     {
-        foreach (var t in tiles) Destroy(t);
-        tiles.Clear();
-        ghost.SetActive(false);
+        GhostData data = unitGhosts[selectedUnit];
+        if (data.hasDestination)
+            return;
+
+        data.ghost.SetActive(true);
+
+        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
+        pos.y = data.ghost.transform.position.y;
+        data.ghost.transform.position = pos;
+
+        UpdatePathLine(selectedUnit, gridPos);
     }
 
+    public void HideGhost()
+    {
+        GhostData data = unitGhosts[selectedUnit];
+        if (data.hasDestination)
+            return;
+
+        data.ghost.SetActive(false);
+        data.line.positionCount = 0;
+    }
+
+    // ===== SELECCIONAR DESTINO =====
+    public void SelectDestination(Vector2Int gridPos)
+    {
+        GhostData data = unitGhosts[selectedUnit];
+
+        data.hasDestination = true;
+        data.destination = gridPos;
+
+        data.ghost.SetActive(true);
+
+        Vector3 pos = GridManager.Instance.GridToWorld(gridPos);
+        pos.y = data.ghost.transform.position.y;
+        data.ghost.transform.position = pos;
+
+        UpdatePathLine(selectedUnit, gridPos);
+    }
+
+    // ===== CONFIRMAR MOVIMIENTO =====
     public void ConfirmMove()
     {
-        if (selectedUnit == null) return;
+        foreach (var pair in unitGhosts)
+        {
+            Unit unit = pair.Key;
+            GhostData data = pair.Value;
 
-        StartCoroutine(
-            selectedUnit.MoveTo(selectedDestination)
-        );
+            if (!data.hasDestination)
+                continue;
 
-        Clear();
+            // Mover la unidad
+            StartCoroutine(unit.MoveTo(data.destination));
+
+            // Limpiar estado visual
+            data.hasDestination = false;
+            data.line.positionCount = 0;
+            data.ghost.SetActive(false);
+        }
+
+        // Limpiar tiles y selección
+        ClearTiles();
+        selectedUnit = null;
     }
 
+    // ===== PATH LINE =====
+    private void UpdatePathLine(Unit unit, Vector2Int destination)
+    {
+        GhostData data = unitGhosts[unit];
 
+        List<Vector2Int> path = Pathfinder.FindPath(
+            unit.GridPosition,
+            destination
+        );
+
+        data.line.positionCount = path.Count + 1;
+
+        Vector3 startPos = GridManager.Instance.GridToWorld(unit.GridPosition);
+        startPos.y = lineHeight;
+        data.line.SetPosition(0, startPos);
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            Vector3 pos = GridManager.Instance.GridToWorld(path[i]);
+            pos.y = lineHeight;
+            data.line.SetPosition(i + 1, pos);
+        }
+    }
+
+    // ===== DESELECCIONAR =====
+    private void DeselectUnit()
+    {
+        ClearTiles();
+        selectedUnit = null;
+    }
+
+    // ===== LIMPIAR TILES =====
+    private void ClearTiles()
+    {
+        foreach (GameObject t in tiles)
+            Destroy(t);
+
+        tiles.Clear();
+    }
+
+    // ===== CREAR GHOST + LINE POR UNIDAD =====
+    private void CreateGhostDataForUnit(Unit unit)
+    {
+        GameObject ghost = Instantiate(ghostPrefab);
+        ghost.SetActive(false);
+
+        GameObject lineGO = new GameObject($"PathLine_{unit.name}");
+        LineRenderer line = lineGO.AddComponent<LineRenderer>();
+
+        line.startWidth = lineWidth;
+        line.endWidth = lineWidth;
+        line.useWorldSpace = true;
+        line.positionCount = 0;
+
+        unitGhosts[unit] = new GhostData
+        {
+            ghost = ghost,
+            line = line,
+            hasDestination = false
+        };
+    }
+
+    // ===== UTIL =====
+    private bool IsMouseOverTile()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            return hit.collider.GetComponent<MoveTile>() != null;
+        }
+
+        return false;
+    }
+}
+
+// ===== DATOS POR UNIDAD =====
+public class GhostData
+{
+    public GameObject ghost;
+    public LineRenderer line;
+    public Vector2Int destination;
+    public bool hasDestination;
 }

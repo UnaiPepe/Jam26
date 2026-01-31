@@ -12,6 +12,12 @@ public class Unit : MonoBehaviour
         GridPosition = GridManager.Instance.WorldToGrid(transform.position);
     }
 
+    private void OnMouseDown()
+    {
+        Debug.Log("CLICK EN UNIDAD");
+        MovementPreview.Instance.Show(this);
+    }
+
     public IEnumerator MoveTo(Vector2Int destination)
     {
         List<Vector2Int> path = Pathfinder.FindPath(GridPosition, destination);

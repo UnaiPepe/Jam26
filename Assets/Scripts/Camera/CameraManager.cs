@@ -20,8 +20,8 @@ namespace Assets.Scripts.Camera
         public Transform[] allViews;
 
         [Header("Settings")]
-        [Tooltip("Speed of the camera movement.")]
-        public float transitionSpeed = 5.0f;
+        [Tooltip("Time it takes to reach the target view (SmoothTime).")]
+        public float transitionTime = 1.0f;
         
         [Tooltip("If true, the camera rotates to match the target view.")]
         public bool matchRotation = true;
@@ -29,6 +29,9 @@ namespace Assets.Scripts.Camera
         private Transform _currentView;
         private int _currentViewIndex = 0;
 
+        // Movement variables
+        private Vector3 _currentVelocity;
+        
         // Shake variables
         private float _shakeTimer;
         private float _shakeTotalDuration;
@@ -93,8 +96,8 @@ namespace Assets.Scripts.Camera
                 shakeOffset = Random.insideUnitSphere * currentStrength;
             }
 
-            // Lerp the BASE position (NOT affected by previous shake)
-            _basePosition = Vector3.Lerp(_basePosition, _currentView.position, Time.deltaTime * transitionSpeed);
+            // SmoothDamp the BASE position (Arrives in approximately transitionTime)
+            _basePosition = Vector3.SmoothDamp(_basePosition, _currentView.position, ref _currentVelocity, transitionTime);
             
             // Apply shake as temporary visual offset
             targetCamera.position = _basePosition + shakeOffset;
@@ -102,7 +105,22 @@ namespace Assets.Scripts.Camera
             // Smoothly interpolate rotation
             if (matchRotation)
             {
-                targetCamera.rotation = Quaternion.Slerp(targetCamera.rotation, _currentView.rotation, Time.deltaTime * transitionSpeed);
+                // For rotation, Slerp with a factor derived from SmoothDamp is tricky.
+                // Simple approach: Use same 'transitionTime' ratio or Quaternion.RotateTowards.
+                // However, SmoothDamp effectively creates an ease-out. 
+                // We'll use Slerp with a damp factor similar to position or just a simple Slerp that is fast enough.
+                // Better approach for "Fixed Time" equivalent in Rotation: Quaternion.Slerp or SmoothDamp equivalent.
+                // Let's use Slerp with a dynamic t based on distance to mimic SmoothDamp or just use a standard quick Lerp.
+                // The user complained about "avanza mas lento" (asymptotic), SmoothDamp IS asymptotic but optimized for arrival.
+                // If the user wants STRICT linear time, we need MoveTowards.
+                // But "tarda mucho... avanza mas lento" implies he dislikes the infinite tail of Lerp.
+                // SmoothDamp is good. Let's stick with Slerp but faster, or use SmoothDampAngle if we decomposed it.
+                // Let's just use Slerp with a slightly higher speed factor relative to transitionTime to ensure it keeps up.
+                float rotSpeed = 1f / Mathf.Max(0.01f, transitionTime); // Inverse of time
+                targetCamera.rotation = Quaternion.Slerp(targetCamera.rotation, _currentView.rotation, Time.deltaTime * rotSpeed * 3f); 
+                // *3f is a heuristic to make rotation feel responsive. 
+                // Alternatively, purely linear:
+                // targetCamera.rotation = Quaternion.RotateTowards(targetCamera.rotation, _currentView.rotation, (180f / transitionTime) * Time.deltaTime);
             }
         }
 

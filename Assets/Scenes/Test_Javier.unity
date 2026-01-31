@@ -510,7 +510,7 @@ Transform:
   m_GameObject: {fileID: 1023820786}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.7349151, w: -0.6781592}
-  m_LocalPosition: {x: -2.5450299, y: 3.5470722, z: 0}
+  m_LocalPosition: {x: -2.54503, y: 3.5470722, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -724,6 +724,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8988852311291104400, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.97044927
+      objectReference: {fileID: 0}
     - target: {fileID: -8653719598885068355, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
       propertyPath: m_Name
       value: Luchador
@@ -768,6 +772,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7346512753387552318, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.85188407
+      objectReference: {fileID: 0}
+    - target: {fileID: -7346512753387552318, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.5237305
+      objectReference: {fileID: 0}
+    - target: {fileID: -3730624812736937592, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8640643
+      objectReference: {fileID: 0}
+    - target: {fileID: -3730624812736937592, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.50338155
+      objectReference: {fileID: 0}
     - target: {fileID: -2902864705442851303, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.23214892
@@ -775,6 +795,10 @@ PrefabInstance:
     - target: {fileID: -2902864705442851303, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2902864705442851303, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9726803
       objectReference: {fileID: 0}
     - target: {fileID: -2223882305794170535, guid: 2e3a143349d7c304b97d392c4c0106cc, type: 3}
       propertyPath: m_LocalRotation.w

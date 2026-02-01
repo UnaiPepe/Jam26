@@ -10,7 +10,7 @@ public class CinematicManager : MonoBehaviour
     public int idDefensor, idAtacante;
     public Animator defensorAnim, atacanteAnim;
     public GameObject VISUALS;
-    public float cinematicDuration = 5f;
+    public float cinematicDuration = 4f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

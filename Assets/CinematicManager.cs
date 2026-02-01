@@ -47,7 +47,7 @@ public class CinematicManager : MonoBehaviour
         atacanteAnim.SetTrigger("Atacar");
         yield return new WaitForSeconds(1f); // espera 2 segundos
         defensorAnim.SetTrigger("RecibirDaño");
-        defensorAnim. 
+        
         //Animar para que salga de pantalla
     }
     // Update is called once per frame

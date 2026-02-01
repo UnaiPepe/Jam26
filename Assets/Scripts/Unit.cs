@@ -162,6 +162,7 @@ public class Unit : MonoBehaviour
             Mathf.Clamp(pushDir.y, -1, 1)
         );
 
+        
         Vector2Int pushTarget = loser.GridPosition + pushDir;
 
         // Ring out -> eliminado

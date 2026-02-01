@@ -66279,10 +66279,6 @@ PrefabInstance:
       propertyPath: targetObject
       value: 
       objectReference: {fileID: 2116772385}
-    - target: {fileID: 827338855374180643, guid: 429768a252d805546b02935dbea7cd55, type: 3}
-      propertyPath: backgroundMusic
-      value: 
-      objectReference: {fileID: 8300000, guid: 71d8e6f0722d6064790d3e499b8949cd, type: 3}
     - target: {fileID: 6404290613394557161, guid: 429768a252d805546b02935dbea7cd55, type: 3}
       propertyPath: m_Name
       value: Managers

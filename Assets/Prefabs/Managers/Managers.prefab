@@ -144,7 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   introClip: {fileID: 8300000, guid: 2cf77207d5bea4746b7e0cfa00bfe6b3, type: 3}
   mainLoopClip: {fileID: 8300000, guid: 2cc074a2761f2214784ee7eff30bbed9, type: 3}
-  backgroundMusic: {fileID: 8300000, guid: b2c85f8bde9fe764fbebf87d43da40c8, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: 22682a57dbb38e049a16fa42aaad2c28, type: 3}
   ambientClip: {fileID: 8300000, guid: 666f11568a2d20d42bc99bae8b8ac67f, type: 3}
   ambientVolume: 0.3
   ambientFadeInTime: 2
@@ -205,6 +205,7 @@ MonoBehaviour:
   showDebugButtons: 1
   startGameDelay: 1.5
   objectToActivateOnStart: {fileID: 0}
+  confirmButton: {fileID: 0}
 --- !u!1 &6404290613394557161
 GameObject:
   m_ObjectHideFlags: 0

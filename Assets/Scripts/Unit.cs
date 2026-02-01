@@ -13,6 +13,10 @@ public class Unit : MonoBehaviour
         NPC
     }
 
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+    static readonly int CaminarTrigger = Animator.StringToHash("caminar");
+
     [Header("Movement")]
     public float moveSpeed = 5f;
     public int movementRange = 5;
@@ -38,6 +42,8 @@ public class Unit : MonoBehaviour
     {
         GridPosition = GridManager.Instance.WorldToGrid(transform.position);
         transform.position = GridManager.Instance.GridToWorld(GridPosition);
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
     }
 
     // ================= PLANNING =================

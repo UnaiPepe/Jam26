@@ -21,6 +21,8 @@ public class CinematicManager : MonoBehaviour
         atacantePosReference= atacantePos.transform.position; 
         defensor = GameObject.Instantiate (luchadores[idDefensor],defensorPosReference, Quaternion.identity);
         atacante = GameObject.Instantiate (luchadores[idAtacante],atacantePosReference,Quaternion.identity);
+        defensorAnim = defensor.GetComponent<Animator>();
+        atacanteAnim = atacante.GetComponent<Animator>();
         Vector3 escala = defensor.transform.localScale;
         escala.x = Mathf.Abs(escala.x) * -1;
         defensor.transform.localScale = escala;
@@ -29,7 +31,20 @@ public class CinematicManager : MonoBehaviour
 
     public void Cinematic()
     {
+        PutScene();
+        StartCoroutine("AccionCinematic");
 
+    }
+    IEnumerator AccionCinematic()
+    {
+        yield return new WaitForSeconds(2f); // espera 2 segundos
+        StartCoroutine("MorirCO");
+    }
+    IEnumerator MorirCO()
+    {
+        atacanteAnim.SetTrigger("ataque");
+        yield return new WaitForSeconds(1f); // espera 2 segundos
+        defensorAnim.SetTrigger("morir");
     }
     // Update is called once per frame
     void Update()

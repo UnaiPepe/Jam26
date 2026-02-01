@@ -14,9 +14,21 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Test_MovEnemies.unity
     guid: 811f33aca9d5b3d4da77b3ce223da980
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Game.unity
     guid: e9fc325f07a47df4f8455096b04e0e8d
+  - enabled: 1
+    path: Assets/Scenes/0_Disclaimer.unity
+    guid: 52a7d973b5f543447a38cb111a162b36
+  - enabled: 1
+    path: Assets/Scenes/1_PvE.unity
+    guid: b85c1286256895f4bb3b754df34fdbc4
+  - enabled: 1
+    path: Assets/Scenes/2_PvP.unity
+    guid: 0dbf1a29f9c991b47bc75114fcf48b65
+  - enabled: 1
+    path: Assets/Scenes/3_PvPvE.unity
+    guid: 53f3706d064f4ac4a913205b1bc6e776
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -163,13 +163,7 @@ public class Unit : MonoBehaviour
             Mathf.Clamp(pushDir.y, -1, 1)
         );
 
-        
-        // Trigger cinematic with winner attacking and loser defending
-        CinematicManager cinematicManager = FindObjectOfType<CinematicManager>();
-        if (cinematicManager != null)
-        {
-            cinematicManager.Cinematic(winner.luchadorID, loser.luchadorID);
-        }
+       
         Vector2Int pushTarget = loser.GridPosition + pushDir;
 
         // Ring out -> eliminado
@@ -178,6 +172,14 @@ public class Unit : MonoBehaviour
             Debug.Log(
                 "'" + winner.name + "' ha tirado del ring a '" + loser.name + "'"
             );
+
+
+            // Trigger cinematic with winner attacking and loser defending
+            CinematicManager cinematicManager = FindObjectOfType<CinematicManager>();
+            if (cinematicManager != null)
+            {
+                cinematicManager.Cinematic(winner.luchadorID, loser.luchadorID);
+            }
 
             loser.gameObject.SetActive(false);
             onFinished?.Invoke();

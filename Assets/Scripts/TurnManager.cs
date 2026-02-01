@@ -26,6 +26,13 @@ public class TurnManager : MonoBehaviour
     // Contador global de turnos (CLAVE)
     public int TurnCounter { get; private set; }
 
+    [Header("End Game UI")]
+    [Tooltip("UI panel to activate when the game ends")]
+    public GameObject endGameUI;
+
+    // Flag to track if game has ended
+    public bool IsGameOver { get; private set; }
+
     // Solo jugadores humanos tienen turno
     private readonly TeamTurn[] playerTurnOrder =
     {
@@ -76,9 +83,12 @@ public class TurnManager : MonoBehaviour
         
         MovementExecution.Instance?.Begin();
         yield return new WaitForSeconds(3f);
-        PhaseManager.Instance.PhaseMove();
-
-
+        
+        // Only show Move phase if game hasn't ended
+        if (!IsGameOver)
+        {
+            PhaseManager.Instance.PhaseMove();
+        }
     }
 
     public void EndMovementExecution()
@@ -185,9 +195,16 @@ public class TurnManager : MonoBehaviour
 
     private void EndGame(TeamTurn winner)
     {
+        IsGameOver = true;
         Debug.Log($"FIN DEL JUEGO - Gana {winner}");
         // Aquí UI, animaciones, cambio de escena, etc.
-        PhaseManager.Instance.PhaseKill();    
+        PhaseManager.Instance.PhaseKill();
+        
+        // Activate End Game UI
+        if (endGameUI != null)
+        {
+            endGameUI.SetActive(true);
+        }
     }
 
     // ================= STATE HELPERS =================

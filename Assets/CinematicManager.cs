@@ -42,9 +42,9 @@ public class CinematicManager : MonoBehaviour
     }
     IEnumerator MorirCO()
     {
-        atacanteAnim.SetTrigger("ataque");
+        atacanteAnim.SetTrigger("Atacar");
         yield return new WaitForSeconds(1f); // espera 2 segundos
-        defensorAnim.SetTrigger("morir");
+        defensorAnim.SetTrigger("RecibirDaño");
     }
     // Update is called once per frame
     void Update()

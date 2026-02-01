@@ -167,9 +167,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 830057695108310365, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.23214853
+      objectReference: {fileID: 0}
+    - target: {fileID: 830057695108310365, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9726804
+      objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: m_Name
       value: Test_Luchador_Prefab (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.1563813
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.98769677
       objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: team
@@ -186,6 +202,22 @@ PrefabInstance:
     - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: movementRange
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.24130483
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9704494
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5262899
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8503053
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -240,6 +272,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1386522099684259436, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.52628964
+      objectReference: {fileID: 0}
+    - target: {fileID: 1386522099684259436, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.85030544
+      objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: m_Name
       value: Enemy_Test_Luchador_Prefab 1 (2)
@@ -248,9 +288,29 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3679111580903507491, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.2413048
+      objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: team
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6909396453365859065, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.15638095
+      objectReference: {fileID: 0}
+    - target: {fileID: 6909396453365859065, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9876969
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492030320884294474, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.23214881
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492030320884294474, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9726803
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1150,9 +1210,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 830057695108310365, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.23214853
+      objectReference: {fileID: 0}
+    - target: {fileID: 830057695108310365, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9726804
+      objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: m_Name
       value: Test_Luchador_Prefab (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.1563813
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.98769677
       objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: moveSpeed
@@ -1165,6 +1241,22 @@ PrefabInstance:
     - target: {fileID: 4391890149641188773, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: movementRange
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.24130483
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9704494
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5262899
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8503053
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1355,9 +1447,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 830057695108310365, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.23214887
+      objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
       propertyPath: m_Name
       value: Test_Luchador_Prefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.156381
+      objectReference: {fileID: 0}
+    - target: {fileID: 3719664904730723566, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9876968
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.24130492
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877885654765043764, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9704493
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5262899
+      objectReference: {fileID: 0}
+    - target: {fileID: 9169353521922420859, guid: ef76b589c79413a478c20b773a719d2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8503053
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1602,14 +1722,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: team
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 7492030320884294474, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.23214881
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492030320884294474, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.9726803
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4741995082009585721, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
@@ -1801,7 +1930,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2392147629825008600, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4391890149641188773, guid: 0f55f3c75cc6a0f47b37b53c56587b6f, type: 3}
       propertyPath: team

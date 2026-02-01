@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    public int luchadorID;
     public enum Team
     {
         Jugador1,
@@ -16,6 +17,7 @@ public class Unit : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private Animator animator;
     static readonly int CaminarTrigger = Animator.StringToHash("caminar");
+    static readonly int CaidaBombaTrigger = Animator.StringToHash("CaidaBomba");
 
     [Header("Movement")]
     public float moveSpeed = 5f;
@@ -142,6 +144,16 @@ public class Unit : MonoBehaviour
 
         ResolvePush(loser, winner, collisionPos, onFinished);
     }
+    void PlayCaidaBomba()
+    {
+        if (animator == null) return;
+
+        
+        animator.ResetTrigger(CaminarTrigger);
+
+        // Lanzar el ataque
+        animator.SetTrigger(CaidaBombaTrigger);
+    }
 
     private void ResolvePush(
         Unit loser,
@@ -149,6 +161,7 @@ public class Unit : MonoBehaviour
         Vector2Int collisionPos,
         System.Action onFinished)
     {
+        winner.PlayCaidaBomba();
         Vector2Int pushDir =
             loser.GridPosition - winner.GridPosition;
 
@@ -253,6 +266,10 @@ public class Unit : MonoBehaviour
         GridPosition = targetGridPos;
 
         isMoving = false;
+        if (animator != null)
+        {
+            animator.SetTrigger("Idle");
+        }
         onFinished?.Invoke();
     }
 }

@@ -30,8 +30,26 @@ public class TurnManager : MonoBehaviour
     [Tooltip("UI panel to activate when the game ends")]
     public GameObject endGameUI;
 
+    [Tooltip("Delay before showing the win/lose UI after Kill announcement")]
+    public float endGameUIDelay = 2f;
+
+    [Header("End Game Audio")]
+    [Tooltip("Main audio source (music)")]
+    public AudioSource musicSource;
+
+    [Tooltip("Ambient audio source")]
+    public AudioSource ambientSource;
+
+    [Tooltip("Volume multiplier during Kill phase (0-1)")]
+    [Range(0f, 1f)]
+    public float killPhaseVolume = 0.3f;
+
     // Flag to track if game has ended
     public bool IsGameOver { get; private set; }
+
+    // Store original volumes
+    private float _originalMusicVolume;
+    private float _originalAmbientVolume;
 
     // Solo jugadores humanos tienen turno
     private readonly TeamTurn[] playerTurnOrder =
@@ -197,9 +215,41 @@ public class TurnManager : MonoBehaviour
     {
         IsGameOver = true;
         Debug.Log($"FIN DEL JUEGO - Gana {winner}");
-        // Aquí UI, animaciones, cambio de escena, etc.
+        StartCoroutine(EndGameSequence());
+    }
+
+    private System.Collections.IEnumerator EndGameSequence()
+    {
+        // Store original volumes
+        if (musicSource != null) _originalMusicVolume = musicSource.volume;
+        if (ambientSource != null) _originalAmbientVolume = ambientSource.volume;
+
+        // Lower volume during Kill phase
+        if (musicSource != null) musicSource.volume = _originalMusicVolume * killPhaseVolume;
+        if (ambientSource != null) ambientSource.volume = _originalAmbientVolume * killPhaseVolume;
+
+        // Show Kill announcement
         PhaseManager.Instance.PhaseKill();
-        
+
+        // Wait for announcement to finish
+        while (PhaseManager.Instance.IsAnnouncementPlaying)
+        {
+            yield return null;
+        }
+
+        // Restore original volume
+        if (musicSource != null) musicSource.volume = _originalMusicVolume;
+        if (ambientSource != null) ambientSource.volume = _originalAmbientVolume;
+
+        // Wait before showing End Game UI
+        yield return new WaitForSeconds(endGameUIDelay);
+
+        // Disable Kill indicator
+        if (PhaseManager.Instance.killIndicator != null)
+        {
+            PhaseManager.Instance.killIndicator.SetActive(false);
+        }
+
         // Activate End Game UI
         if (endGameUI != null)
         {

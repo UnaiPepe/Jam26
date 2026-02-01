@@ -156,6 +156,12 @@ namespace Assets.Scripts.Phases
                 gameObject.SetActive(false);
             }
             _rectTransform.localPosition = _originalPosition;
+
+            // Notify PhaseManager that announcement is complete
+            if (Assets.Scripts.Managers.PhaseManager.Instance != null)
+            {
+                Assets.Scripts.Managers.PhaseManager.Instance.OnAnnouncementComplete();
+            }
         }
 
         private void VibrateText()

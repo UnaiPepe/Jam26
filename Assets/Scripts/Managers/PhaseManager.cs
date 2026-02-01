@@ -48,6 +48,15 @@ namespace Assets.Scripts.Managers
         [Tooltip("GameObject to activate when the game starts (e.g. gameplay HUD, decorations).")]
         public GameObject objectToActivateOnStart;
 
+        [Header("Button Lock")]
+        [Tooltip("Optional: Button to disable during announcements (e.g. confirm move button)")]
+        public UnityEngine.UI.Button confirmButton;
+
+        /// <summary>
+        /// True while an announcement animation is playing. Use this to prevent overlapping announcements.
+        /// </summary>
+        public bool IsAnnouncementPlaying { get; private set; }
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -58,6 +67,7 @@ namespace Assets.Scripts.Managers
         {
             // Initial setup - wait for manual start
             currentPhase = GamePhase.Setup;
+            IsAnnouncementPlaying = false;
         }
 
         public void StartGame()
@@ -121,6 +131,13 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void ShowPhaseAnnouncement(GamePhase phase)
         {
+            // Set lock flag and disable button
+            IsAnnouncementPlaying = true;
+            if (confirmButton != null)
+            {
+                confirmButton.interactable = false;
+            }
+
             DisableAllAnnouncements();
             DisableAllIndicators();
 
@@ -139,6 +156,19 @@ namespace Assets.Scripts.Managers
             if (indicator != null)
             {
                 indicator.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// Call this when an announcement animation finishes to unlock the system.
+        /// Called by PhaseAnnouncement script when animation completes.
+        /// </summary>
+        public void OnAnnouncementComplete()
+        {
+            IsAnnouncementPlaying = false;
+            if (confirmButton != null)
+            {
+                confirmButton.interactable = true;
             }
         }
 

@@ -149,10 +149,38 @@ public class Unit : MonoBehaviour
         if (animator == null) return;
 
         
-        animator.ResetTrigger(CaminarTrigger);
+        animator.ResetTrigger("Caminar");
 
         // Lanzar el ataque
+        animator.SetTrigger("CaidaBomba");
+    }
+    IEnumerator CaidaBombaRoutine()
+    {
+        // cortar caminar sí o sí
+        animator.ResetTrigger("Caminar");
+        animator.ResetTrigger("Idle");
+
+        // lanzar ataque
         animator.SetTrigger(CaidaBombaTrigger);
+
+        // esperar 1 frame para que entre
+        yield return null;
+
+        // Esperar a que termine el estado de ataque
+        // PON AQUÍ el nombre EXACTO del ESTADO en el Animator
+        const string attackStateName = "CaidaBomba";
+
+        // espera a estar en el estado
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName(attackStateName))
+            yield return null;
+
+        // espera a que termine
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            yield return null;
+
+        // volver a idle
+        animator.ResetTrigger(CaidaBombaTrigger);
+        animator.SetTrigger("Idle");
     }
 
     private void ResolvePush(

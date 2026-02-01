@@ -142,6 +142,7 @@ public class Unit : MonoBehaviour
         Unit winner = thisWins ? this : other;
         Unit loser = thisWins ? other : this;
 
+
         ResolvePush(loser, winner, collisionPos, onFinished);
     }
   
@@ -163,6 +164,12 @@ public class Unit : MonoBehaviour
         );
 
         
+        // Trigger cinematic with winner attacking and loser defending
+        CinematicManager cinematicManager = FindObjectOfType<CinematicManager>();
+        if (cinematicManager != null)
+        {
+            cinematicManager.Cinematic(winner.luchadorID, loser.luchadorID);
+        }
         Vector2Int pushTarget = loser.GridPosition + pushDir;
 
         // Ring out -> eliminado

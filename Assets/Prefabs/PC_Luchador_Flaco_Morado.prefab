@@ -67,7 +67,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 159d32ec5dc6bcb458730934e6abf489, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  luchadorID: 0
+  luchadorID: 3
   animator: {fileID: 0}
   moveSpeed: 7
   movementRange: 7

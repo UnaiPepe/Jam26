@@ -230,10 +230,6 @@ public class Unit : MonoBehaviour
         System.Action onFinished)
     {
         isMoving = true;
-        if (animator != null)
-            animator.SetTrigger("Caminar");
-
-
 
         Vector3 start = transform.position;
         Vector3 end = targetWorldPos;

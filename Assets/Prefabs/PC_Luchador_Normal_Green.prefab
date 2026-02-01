@@ -106,6 +106,7 @@ GameObject:
   - component: {fileID: 801510944575191260}
   - component: {fileID: 680847012946695137}
   - component: {fileID: 4391890149641188773}
+  - component: {fileID: 4616962229146505675}
   m_Layer: 0
   m_Name: PC_Luchador_Normal_Green
   m_TagString: Untagged
@@ -167,7 +168,19 @@ MonoBehaviour:
   moveSpeed: 5
   movementRange: 5
   pushBonus: 0
-  team: 0
+  team: 2
+--- !u!114 &4616962229146505675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2392147629825008600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c564547aa66b77a48ae0671964cd8629, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8155461996113839354
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -11,11 +11,20 @@ public class CinematicManager : MonoBehaviour
     public Animator defensorAnim, atacanteAnim;
     public GameObject VISUALS;
     public float cinematicDuration = 4f;
+
+    [Header("Audio")]
+public AudioClip[] cinematicAudios;
+private AudioSource audioSource;
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
+    
 
     public void PutScene(int id1, int id2)
     {
@@ -36,10 +45,19 @@ public class CinematicManager : MonoBehaviour
 
     public void Cinematic(int idatack, int iddefence)
     {
+        
         if (VISUALS != null) VISUALS.SetActive(true);
         Debug.Log($"Cinematic called with idattack: {idatack}, iddefence: {iddefence}");
         int a = idatack;
         int b = iddefence;
+
+        // Play random audio
+    if (cinematicAudios != null && cinematicAudios.Length > 0 && audioSource != null)
+    {
+        int randomIndex = Random.Range(0, cinematicAudios.Length);
+        audioSource.PlayOneShot(cinematicAudios[randomIndex]);
+    }
+
         PutScene(b,a);
         StartCoroutine("AccionCinematic");
 

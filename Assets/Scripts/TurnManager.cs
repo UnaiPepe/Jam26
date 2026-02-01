@@ -95,7 +95,7 @@ public class TurnManager : MonoBehaviour
     private System.Collections.IEnumerator ExecuteMovementWithDelay()
     {
         // Show Act announcement
-        PhaseManager.Instance.PhaseAct();
+        // PhaseManager.Instance.PhaseAct();
         
         // Wait for announcement to finish before movement starts
         

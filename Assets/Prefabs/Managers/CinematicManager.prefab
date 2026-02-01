@@ -128,7 +128,14 @@ MonoBehaviour:
   defensorAnim: {fileID: 0}
   atacanteAnim: {fileID: 0}
   VISUALS: {fileID: 3967381808660308464}
-  cinematicDuration: 5
+  cinematicDuration: 3
+  cinematicAudios:
+  - {fileID: 8300000, guid: 462f12bf82a2b314f8a4193e5221f01f, type: 3}
+  - {fileID: 8300000, guid: 471d989a9c5743647942faf391700a64, type: 3}
+  - {fileID: 8300000, guid: 568dda315a742cb458df927d7211de66, type: 3}
+  - {fileID: 8300000, guid: 0ea470993a37a47439ac81524472fda9, type: 3}
+  - {fileID: 8300000, guid: 0799043f26c869e4ead1ee3ede855ae8, type: 3}
+  - {fileID: 8300000, guid: 88215a7e55b91914987d0b1626a75847, type: 3}
 --- !u!1 &7450904995640925124
 GameObject:
   m_ObjectHideFlags: 0

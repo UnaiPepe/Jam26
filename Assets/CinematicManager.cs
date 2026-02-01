@@ -15,12 +15,12 @@ public class CinematicManager : MonoBehaviour
         
     }
 
-    public void PutScene()
+    public void PutScene(int id1, int id2)
     {
         defensorPosReference= defensorPos.transform.position;
         atacantePosReference= atacantePos.transform.position; 
-        defensor = GameObject.Instantiate (luchadores[idDefensor],defensorPosReference, Quaternion.identity);
-        atacante = GameObject.Instantiate (luchadores[idAtacante],atacantePosReference,Quaternion.identity);
+        defensor = GameObject.Instantiate (luchadores[id1],defensorPosReference, Quaternion.identity);
+        atacante = GameObject.Instantiate (luchadores[id2],atacantePosReference,Quaternion.identity);
         defensorAnim = defensor.GetComponent<Animator>();
         atacanteAnim = atacante.GetComponent<Animator>();
         Vector3 escala = defensor.transform.localScale;
@@ -29,9 +29,11 @@ public class CinematicManager : MonoBehaviour
 
     }
 
-    public void Cinematic()
+    public void Cinematic(int idatack, int iddefence)
     {
-        PutScene();
+        int a = idatack;
+        int b = iddefence;
+        PutScene(b,a);
         StartCoroutine("AccionCinematic");
 
     }
@@ -45,6 +47,8 @@ public class CinematicManager : MonoBehaviour
         atacanteAnim.SetTrigger("Atacar");
         yield return new WaitForSeconds(1f); // espera 2 segundos
         defensorAnim.SetTrigger("RecibirDaño");
+        defensorAnim. 
+        //Animar para que salga de pantalla
     }
     // Update is called once per frame
     void Update()

@@ -6,8 +6,6 @@ namespace Assets.Scripts.UI
     [RequireComponent(typeof(AudioSource))]
     public class StartupSequence : MonoBehaviour
     {
-        public static StartupSequence Instance { get; private set; }
-
         [Header("Audio Order")]
         [Tooltip("The initial intro sound.")]
         public AudioClip introClip;
@@ -35,11 +33,9 @@ namespace Assets.Scripts.UI
 
         private AudioSource _audioSource;
         private AudioSource _ambientSource;
-        private bool _hasSkipped = false;
 
         private void Awake()
         {
-            Instance = this;
             _audioSource = GetComponent<AudioSource>();
 
             // Create a second AudioSource for ambient
@@ -51,52 +47,6 @@ namespace Assets.Scripts.UI
         private void Start()
         {
             StartCoroutine(PlaySequence());
-        }
-
-        /// <summary>
-        /// Skips the intro sequence and jumps directly to gameplay.
-        /// Call this from your Skip Intro button.
-        /// </summary>
-        public void SkipIntro()
-        {
-            if (_hasSkipped) return;
-            _hasSkipped = true;
-
-            // Stop all running coroutines (PlaySequence, FadeInAmbient)
-            StopAllCoroutines();
-
-            // Stop current intro audio
-            _audioSource.Stop();
-            _ambientSource.Stop();
-
-            // Move camera to gameplay view
-            if (Assets.Scripts.Camera.CameraManager.Instance != null)
-            {
-                Assets.Scripts.Camera.CameraManager.Instance.NextView();
-            }
-
-            // Trigger Move phase announcement
-            if (Assets.Scripts.Managers.PhaseManager.Instance != null)
-            {
-                Assets.Scripts.Managers.PhaseManager.Instance.PhaseMove();
-            }
-
-            // Start background music
-            if (backgroundMusic != null)
-            {
-                _audioSource.clip = backgroundMusic;
-                _audioSource.loop = true;
-                _audioSource.Play();
-            }
-
-            // Start ambient with fade-in
-            if (ambientClip != null)
-            {
-                _ambientSource.clip = ambientClip;
-                _ambientSource.volume = 0f;
-                _ambientSource.Play();
-                StartCoroutine(FadeInAmbient());
-            }
         }
 
         private IEnumerator PlaySequence()
@@ -146,8 +96,6 @@ namespace Assets.Scripts.UI
                 _ambientSource.Play();
                 StartCoroutine(FadeInAmbient());
             }
-
-            _hasSkipped = true; // Sequence completed naturally
         }
 
         private IEnumerator FadeInAmbient()

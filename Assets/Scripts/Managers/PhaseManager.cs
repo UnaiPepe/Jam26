@@ -65,6 +65,83 @@ namespace Assets.Scripts.Managers
             StartCoroutine(StartGameSequence());
         }
 
+        // ================= INDIVIDUAL PHASE METHODS =================
+
+        /// <summary>
+        /// Triggers the Move phase announcement and indicator.
+        /// </summary>
+        public void PhaseMove()
+        {
+            ShowPhaseAnnouncement(GamePhase.Move);
+        }
+
+        /// <summary>
+        /// Triggers the Act phase announcement and indicator.
+        /// </summary>
+        public void PhaseAct()
+        {
+            ShowPhaseAnnouncement(GamePhase.Act);
+        }
+
+        /// <summary>
+        /// Triggers the Start phase announcement and indicator.
+        /// </summary>
+        public void PhaseStart()
+        {
+            ShowPhaseAnnouncement(GamePhase.Start);
+        }
+
+        /// <summary>
+        /// Triggers the Kill phase announcement and indicator.
+        /// </summary>
+        public void PhaseKill()
+        {
+            ShowPhaseAnnouncement(GamePhase.Kill);
+        }
+
+        /// <summary>
+        /// Triggers the Victory phase announcement.
+        /// </summary>
+        public void PhaseVictory()
+        {
+            ShowPhaseAnnouncement(GamePhase.Victory);
+        }
+
+        /// <summary>
+        /// Triggers the Defeat phase announcement.
+        /// </summary>
+        public void PhaseDefeat()
+        {
+            ShowPhaseAnnouncement(GamePhase.Defeat);
+        }
+
+        /// <summary>
+        /// Shows the announcement and indicator for the specified phase.
+        /// Does NOT update currentPhase - purely visual.
+        /// </summary>
+        private void ShowPhaseAnnouncement(GamePhase phase)
+        {
+            DisableAllAnnouncements();
+            DisableAllIndicators();
+
+            GameObject announcement = GetAnnouncement(phase);
+            GameObject indicator = GetIndicator(phase);
+
+            if (announcement != null)
+            {
+                announcement.SetActive(true);
+                if (announcement.transform.childCount > 0)
+                {
+                    announcement.transform.GetChild(0).gameObject.SetActive(true);
+                }
+            }
+
+            if (indicator != null)
+            {
+                indicator.SetActive(true);
+            }
+        }
+
         private IEnumerator StartGameSequence()
         {
             Debug.Log("Starting Game Sequence...");
@@ -88,8 +165,8 @@ namespace Assets.Scripts.Managers
             // 2. Wait
             yield return new WaitForSeconds(startGameDelay);
 
-            // 3. Start Game Loop
-            ChangePhase(GamePhase.Move);
+            // 3. Start Game Loop - Show Move Phase Announcement
+            PhaseMove();
         }
 
         public void NextPhase()
@@ -182,7 +259,7 @@ namespace Assets.Scripts.Managers
             DisableAllAnnouncements();
 
             currentPhase = newPhase;
-            Debug.Log($"Changing Phase to: {newPhase}");
+            //Debug.Log($"Changing Phase to: {newPhase}");
 
             // 2. Activate BOTH the Announcement and Indicator for the new phase
             GameObject announcement = GetAnnouncement(newPhase);
@@ -201,7 +278,7 @@ namespace Assets.Scripts.Managers
             if (indicator != null)
             {
                 indicator.SetActive(true);
-                Debug.Log($"Activated Indicator for {newPhase}");
+                //Debug.Log($"Activated Indicator for {newPhase}");
             }
 
             // Special Logic

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Managers;
 
 public enum TeamTurn
 {
@@ -63,7 +64,21 @@ public class TurnManager : MonoBehaviour
             return;
 
         CurrentState = TurnState.MovementExecution;
+        StartCoroutine(ExecuteMovementWithDelay());
+    }
+
+    private System.Collections.IEnumerator ExecuteMovementWithDelay()
+    {
+        // Show Act announcement
+        PhaseManager.Instance.PhaseAct();
+        
+        // Wait for announcement to finish before movement starts
+        
         MovementExecution.Instance?.Begin();
+        yield return new WaitForSeconds(3f);
+        PhaseManager.Instance.PhaseMove();
+
+
     }
 
     public void EndMovementExecution()
@@ -77,7 +92,7 @@ public class TurnManager : MonoBehaviour
     {
         ResetUnitsTurnState();
 
-        // 🔚 FIN DE PARTIDA (jugadores + NPC)
+        //FIN DE PARTIDA (jugadores + NPC)
         List<TeamTurn> aliveTeams = GetAliveTeams();
         if (aliveTeams.Count <= 1)
         {
@@ -85,7 +100,7 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // 🔄 ROTACIÓN DE TURNOS (solo jugadores vivos)
+        //ROTACIÓN DE TURNOS (solo jugadores vivos)
         List<TeamTurn> alivePlayers = GetAlivePlayerTeams();
 
         int index = System.Array.IndexOf(playerTurnOrder, CurrentTeamTurn);
@@ -102,11 +117,11 @@ public class TurnManager : MonoBehaviour
             }
         }
 
-        // 🔑 Nuevo turno
+        //Nuevo turno
         TurnCounter++;
         CurrentState = TurnState.Planning;
 
-        Debug.Log($"Turno {TurnCounter} – Turno de {CurrentTeamTurn}");
+        Debug.Log($"Turno {TurnCounter} - Turno de {CurrentTeamTurn}");
     }
 
     // ================= HELPERS =================
@@ -170,8 +185,9 @@ public class TurnManager : MonoBehaviour
 
     private void EndGame(TeamTurn winner)
     {
-        Debug.Log($"FIN DEL JUEGO – Gana {winner}");
+        Debug.Log($"FIN DEL JUEGO - Gana {winner}");
         // Aquí UI, animaciones, cambio de escena, etc.
+        PhaseManager.Instance.PhaseKill();    
     }
 
     // ================= STATE HELPERS =================

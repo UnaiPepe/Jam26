@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7235127154038533413}
   - component: {fileID: 6653840614049306213}
   m_Layer: 5
-  m_Name: Ind_Start
+  m_Name: Ind_Stop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,11 +87,9 @@ MonoBehaviour:
 
     T
 
-    A
+    O
 
-    R
-
-    T'
+    P'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}

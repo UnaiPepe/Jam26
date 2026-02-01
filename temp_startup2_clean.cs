@@ -75,10 +75,10 @@ namespace Assets.Scripts.UI
                 Assets.Scripts.Camera.CameraManager.Instance.NextView();
             }
 
-            // Trigger Move phase announcement
+            // Trigger Move phase
             if (Assets.Scripts.Managers.PhaseManager.Instance != null)
             {
-                Assets.Scripts.Managers.PhaseManager.Instance.PhaseMove();
+                Assets.Scripts.Managers.PhaseManager.Instance.ChangePhase(Assets.Scripts.Managers.GamePhase.Move);
             }
 
             // Start background music

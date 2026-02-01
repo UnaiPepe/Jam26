@@ -10357,6 +10357,68 @@ MonoBehaviour:
   enableIdleWobble: 1
   wobbleSpeed: 0.5
   wobbleAmount: 5
+--- !u!1001 &203918572
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 5611474504376323503}
+    m_Modifications:
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -22.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 13.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -18.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8983527
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.21567538
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.37210986
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.089335665
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 27
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4045180429086633211, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+      propertyPath: m_Name
+      value: CinematicManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+--- !u!4 &203918573 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 261245354441315377, guid: 44585177c0102b9488c7bd8aa5f2065f, type: 3}
+  m_PrefabInstance: {fileID: 203918572}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &213402264 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7655909785034041944, guid: 429768a252d805546b02935dbea7cd55, type: 3}
@@ -111578,10 +111640,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1086614609}
-        m_TargetAssemblyTypeName: ChangeSceneButton, Assembly-CSharp
-        m_MethodName: ChangeSceneToNum
-        m_Mode: 3
+      - m_Target: {fileID: 1954080765}
+        m_TargetAssemblyTypeName: ConfirmMoveButton, Assembly-CSharp
+        m_MethodName: OnClickMove
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -127646,6 +127708,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 229755350578217715, guid: 7baafb44bb9aba14e99e50675b9e558c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1086614610}
+    - targetCorrespondingSourceObject: {fileID: 229755350578217715, guid: 7baafb44bb9aba14e99e50675b9e558c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 203918573}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7baafb44bb9aba14e99e50675b9e558c, type: 3}
 --- !u!4 &5611474504376323503 stripped
